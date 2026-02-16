@@ -1,0 +1,221 @@
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Assessment Result - Health Companion</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">					
+	</head>
+	<body>
+		<div>
+			<div class="border">
+				<div class="header">
+					<h1>Assessment Result</h1>
+				</div>
+
+				<div class="msgfinal">{{ msg }}</div>
+
+				<div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+					<a href="{{ url_for('login') }}" class="btn">← Back to Dashboard</a>
+					<a href="{{ url_for('logout') }}" class="btn" style="background-color: #64748b;">Logout</a>
+				</div>
+			</div>
+		</div>
+	</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assessment Result | Health Companion</title>
+
+<style>
+/* ==================================================
+   GLOBAL BACKGROUND
+   ================================================== */
+body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+        linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+        url('{{ url_for("static", filename="bg.jpg") }}') center/cover no-repeat;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* ==================================================
+   RESULT CONTAINER
+   ================================================== */
+.result-container {
+    width: 100%;
+    max-width: 900px;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+    padding: 40px 45px;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* ==================================================
+   HEADER / BRANDING
+   ================================================== */
+.result-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.result-header h1 {
+    margin: 0;
+    font-size: 34px;
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.result-header h1 span {
+    color: #06b6d4;
+}
+
+.result-header p {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #475569;
+    letter-spacing: 0.3px;
+}
+
+/* ==================================================
+   RESULT MESSAGE CARD
+   ================================================== */
+.result-message {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 35px;
+    border: 1px solid #cbd5e1;
+    font-size: 13px;
+    color: #2d3748;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: 'Segoe UI', 'Courier New', monospace;
+    animation: fadeIn 0.8s ease-out;
+    max-height: 75vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* ==================================================
+   ACTION BUTTONS
+   ================================================== */
+.result-actions {
+    margin-top: 35px;
+    padding-top: 25px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.result-actions a {
+    padding: 12px 26px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+/* Back button */
+.result-actions .back {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    color: #ffffff;
+}
+
+.result-actions .back:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(6,182,212,0.35);
+}
+
+/* Logout button */
+.result-actions .logout {
+    background: #64748b;
+    color: #ffffff;
+}
+
+.result-actions .logout:hover {
+    background: #475569;
+    transform: translateY(-3px);
+}
+
+/* ==================================================
+   ANIMATIONS
+   ================================================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ==================================================
+   RESPONSIVE
+   ================================================== */
+@media (max-width: 768px) {
+    .result-container {
+        padding: 30px 25px;
+    }
+
+    .result-header h1 {
+        font-size: 26px;
+    }
+
+    .result-message {
+        padding: 22px;
+        font-size: 14px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="result-container">
+
+    <!-- HEADER -->
+    <div class="result-header">
+        <h1>Health <span>Companion</span></h1>
+        <p>Machine Learning Based Health Risk Assessment</p>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result-message">
+        {{ msg }}
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="result-actions">
+        <a href="{{ url_for('login') }}" class="back">← Back to Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    </div>
+
+</div>
+
+</body>
+</html>
+
+

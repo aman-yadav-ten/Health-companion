@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Health Companion</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background: radial-gradient(circle at top left, #10253f, #081625 70%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        .nav {
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+            background: rgba(6, 14, 26, 0.7);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .brand { font-weight: 800; color: #22d3ee; }
+        .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+        .nav a {
+            color: #e2e8f0;
+            text-decoration: none;
+            font-size: 13px;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.06);
+        }
+        .container { max-width: 1200px; margin: 24px auto; padding: 0 16px 30px; }
+        .header h1 { font-size: 30px; color: #fff; }
+        .header p { margin-top: 8px; color: #94a3b8; font-size: 14px; }
+        .grid {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+        .card {
+            background: rgba(15,23,42,0.62);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 14px;
+            padding: 16px;
+        }
+        .card h3 { font-size: 12px; color: #94a3b8; font-weight: 600; }
+        .card .value { margin-top: 8px; font-size: 26px; color: #fff; font-weight: 800; }
+
+        .section {
+            margin-top: 18px;
+            background: rgba(15,23,42,0.62);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 14px;
+            padding: 18px;
+        }
+        .section h2 { font-size: 18px; margin-bottom: 12px; }
+        .msg {
+            margin-top: 14px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            border: 1px solid transparent;
+        }
+        .msg.success { background: rgba(16,185,129,0.18); color: #6ee7b7; border-color: rgba(16,185,129,0.4); }
+        .msg.error { background: rgba(239,68,68,0.18); color: #fecaca; border-color: rgba(239,68,68,0.4); }
+        .form-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+        input[type=\"password\"] {
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(2, 6, 23, 0.6);
+            color: #fff;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 13px;
+        }
+        .btn {
+            margin-top: 10px;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            background: #06b6d4;
+            color: #06212e;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 13px; }
+        th { color: #94a3b8; font-weight: 700; }
+        .pill {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .ok { background: rgba(16,185,129,0.18); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.4); }
+        .bad { background: rgba(239,68,68,0.18); color: #fecaca; border: 1px solid rgba(239,68,68,0.4); }
+
+        @media (max-width: 980px) { .grid { grid-template-columns: repeat(2, 1fr);} }
+        @media (max-width: 620px) { .grid { grid-template-columns: 1fr;} }
+        @media (max-width: 900px) { .form-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <div class="brand">Health Companion Admin</div>
+        <div class="nav-links">
+            <a href="{{ url_for('admin_dashboard') }}">Overview</a>
+            <a href="{{ url_for('admin_users') }}">Users</a>
+            <a href="{{ url_for('admin_predictions') }}">Predictions</a>
+            <a href="{{ url_for('admin_logs') }}">System Logs</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Application Owner Dashboard</h1>
+            <p>Welcome, {{ username }}. Monitor users, activity, and model health from this panel.</p>
+            {% if msg %}
+            <div class="msg {{ 'success' if status == 'success' else 'error' }}">{{ msg }}</div>
+            {% endif %}
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>Total Users</h3>
+                <div class="value">{{ total_users }}</div>
+            </div>
+            <div class="card">
+                <h3>Admin Accounts</h3>
+                <div class="value">{{ total_admins }}</div>
+            </div>
+            <div class="card">
+                <h3>Enabled Users</h3>
+                <div class="value">{{ active_users }}</div>
+            </div>
+            <div class="card">
+                <h3>Recently Active (30d)</h3>
+                <div class="value">{{ recent_active_users }}</div>
+            </div>
+            <div class="card">
+                <h3>Total Predictions</h3>
+                <div class="value">{{ total_predictions }}</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Model Monitoring</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Status</th>
+                        <th>Last Prediction Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for model in model_status %}
+                    <tr>
+                        <td>{{ model.name }}</td>
+                        <td>
+                            {% if model.loaded %}
+                                <span class="pill ok">Loaded</span>
+                            {% else %}
+                                <span class="pill bad">Missing</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ model.last_prediction if model.last_prediction else 'No predictions yet' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Admin Password Reset</h2>
+            <form method="post" action="{{ url_for('admin_reset_password') }}">
+                <div class="form-grid">
+                    <input type="password" name="current_password" placeholder="Current Password" required>
+                    <input type="password" name="new_password" placeholder="New Password (min 8 chars)" required>
+                    <input type="password" name="confirm_password" placeholder="Confirm New Password" required>
+                </div>
+                <button type="submit" class="btn">Update Password</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

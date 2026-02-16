@@ -1,0 +1,22 @@
+.DS_Store
+.env
+.venv/
+__pycache__/
+*.pyc
+
+# Local runtime data
+health_companion.db
+health_companion.db-shm
+health_companion.db-wal
+database/health_companion.db
+health-models/cardio_model.pkl
+
+# Backups and generated artifacts
+backups/
+
+# IDE/editor
+.vscode/
+.idea/
+
+# OS and logs
+*.log

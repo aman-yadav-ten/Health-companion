@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Login - Health Companion</title>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+		<style> 
+
+
+		/* ============================= */
+		/* GLOBAL & BACKGROUND */
+		/* ============================= */
+		body.login-page {
+			margin: 0;
+			min-height: 100vh;
+			background:
+				linear-gradient(rgba(4, 10, 20, 0.70), rgba(4, 10, 20, 0.70)),
+				url('{{ url_for("static", filename="bg.jpg") }}') center/cover no-repeat;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			padding: 25px;
+			overflow-x: hidden;
+		}
+
+		/* ============================= */
+		/* MAIN WRAPPER (LANDSCAPE) */
+		/* ============================= */
+		.login-wrapper {
+			width: 100%;
+			max-width: 1180px;
+			display: grid;
+			grid-template-columns: 1.1fr 0.9fr;
+			gap: 55px;
+			align-items: center;
+			animation: fadeIn 0.7s ease-out;
+		}
+
+		/* ============================= */
+		/* LEFT SIDE – PROJECT INFO */
+		/* ============================= */
+		.project-info {
+			color: #ffffff;
+			animation: fadeLeft 0.9s ease-out;
+			padding: 10px;
+		}
+
+		.project-info h1 {
+			font-size: 58px;
+			font-weight: 900;
+			margin: 0;
+			line-height: 1.05;
+			letter-spacing: -1px;
+			text-shadow: 0 10px 25px rgba(0,0,0,0.5);
+		}
+
+		.project-info h1 span {
+			color: #22d3ee;
+			position: relative;
+		}
+
+		.project-info h1 span::after {
+			content: "";
+			position: absolute;
+			left: 0;
+			bottom: -10px;
+			width: 100%;
+			height: 4px;
+			border-radius: 99px;
+			background: linear-gradient(90deg, #06b6d4, #22d3ee);
+		}
+
+		.project-info .tagline {
+			margin-top: 18px;
+			font-size: 15px;
+			color: #cbd5e1;
+			line-height: 1.8;
+			max-width: 520px;
+		}
+
+		/* highlight strip */
+		.highlight-strip {
+			margin-top: 20px;
+			display: flex;
+			flex-wrap: wrap;
+			gap: 10px;
+		}
+
+		.strip-pill {
+			background: rgba(255, 255, 255, 0.10);
+			border: 1px solid rgba(255, 255, 255, 0.16);
+			padding: 8px 14px;
+			border-radius: 999px;
+			font-size: 12px;
+			font-weight: 600;
+			color: #e2e8f0;
+			backdrop-filter: blur(10px);
+			transition: transform 0.25s ease, border-color 0.25s ease;
+		}
+
+		.strip-pill:hover {
+			transform: translateY(-2px);
+			border-color: rgba(34, 211, 238, 0.35);
+		}
+
+		.feature-list {
+			margin-top: 25px;
+			display: flex;
+			flex-direction: column;
+			gap: 14px;
+			max-width: 520px;
+		}
+
+		.feature-item {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			font-size: 14px;
+			color: #f8fafc;
+			background: rgba(255, 255, 255, 0.06);
+			border: 1px solid rgba(255, 255, 255, 0.12);
+			border-radius: 14px;
+			padding: 12px 14px;
+			backdrop-filter: blur(10px);
+			transition: transform 0.25s ease, border-color 0.25s ease;
+		}
+
+		.feature-item:hover {
+			transform: translateX(4px);
+			border-color: rgba(34, 211, 238, 0.35);
+		}
+
+		.feature-item span {
+			color: #22d3ee;
+			font-size: 18px;
+			flex-shrink: 0;
+		}
+
+		/* ============================= */
+		/* RIGHT SIDE – LOGIN CARD */
+		/* ============================= */
+		.login-card {
+			background: rgba(255,255,255,0.96);
+			border-radius: 20px;
+			padding: 44px 42px;
+			box-shadow: 0 25px 70px rgba(0,0,0,0.45);
+			animation: fadeRight 0.9s ease-out;
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			position: relative;
+			overflow: hidden;
+		}
+
+		.login-card::before {
+			content: "";
+			position: absolute;
+			top: -100px;
+			left: -100px;
+			width: 220px;
+			height: 220px;
+			border-radius: 50%;
+			background: radial-gradient(circle, rgba(34,211,238,0.35), transparent 65%);
+			filter: blur(20px);
+			opacity: 0.9;
+		}
+
+		/* ============================= */
+		/* FORM TITLE */
+		/* ============================= */
+		.login-form-title {
+			text-align: center;
+			margin-bottom: 28px;
+			position: relative;
+			z-index: 2;
+		}
+
+		.login-form-title h2 {
+			margin: 0;
+			font-size: 30px;
+			font-weight: 800;
+			color: #0f172a;
+			letter-spacing: -0.4px;
+		}
+
+		.login-form-title p {
+			margin-top: 8px;
+			font-size: 14px;
+			color: #475569;
+		}
+
+		/* ============================= */
+		/* FORM & INPUTS */
+		/* ============================= */
+		form {
+			display: flex;
+			flex-direction: column;
+			gap: 18px;
+			position: relative;
+			z-index: 2;
+		}
+
+		.form-group {
+			display: flex;
+			flex-direction: column;
+		}
+
+		label {
+			font-size: 12px;
+			font-weight: 700;
+			color: #0f172a;
+			margin-bottom: 7px;
+			letter-spacing: 0.5px;
+			text-transform: uppercase;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		label i {
+			color: #06b6d4;
+			font-size: 14px;
+		}
+
+		.textbox {
+			padding: 14px 16px;
+			border-radius: 12px;
+			border: 2px solid #e2e8f0;
+			font-size: 15px;
+			background: #f8fafc;
+			transition: all 0.25s ease;
+		}
+
+		.textbox:focus {
+			outline: none;
+			border-color: #06b6d4;
+			box-shadow: 0 0 0 5px rgba(6,182,212,0.14);
+			background: #ffffff;
+			transform: translateY(-1px);
+		}
+
+		/* ============================= */
+		/* LOGIN BUTTON */
+		/* ============================= */
+		.login-btn {
+			margin-top: 6px;
+			padding: 14px;
+			border-radius: 12px;
+			border: none;
+			background: linear-gradient(135deg, #06b6d4, #0891b2);
+			color: #ffffff;
+			font-size: 15px;
+			font-weight: 800;
+			cursor: pointer;
+			box-shadow: 0 10px 28px rgba(6,182,212,0.35);
+			transition: transform 0.25s ease, box-shadow 0.25s ease;
+			position: relative;
+			overflow: hidden;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.login-btn::after {
+			content: "";
+			position: absolute;
+			inset: 0;
+			background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+			transform: translateX(-120%);
+			transition: transform 0.6s ease;
+		}
+
+		.login-btn:hover::after {
+			transform: translateX(120%);
+		}
+
+		.login-btn:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 18px 45px rgba(6,182,212,0.45);
+		}
+
+		.login-btn:active {
+			transform: translateY(-1px);
+			box-shadow: 0 8px 20px rgba(6,182,212,0.3);
+		}
+
+		/* ============================= */
+		/* MESSAGE / ERROR */
+		/* ============================= */
+		.msg {
+			background: #fee2e2;
+			color: #991b1b;
+			padding: 12px 14px;
+			border-radius: 10px;
+			font-size: 13px;
+			border-left: 5px solid #dc2626;
+			animation: fadeDown 0.4s ease;
+		}
+
+		/* ============================= */
+		/* FOOTER LINK */
+		/* ============================= */
+		.login-bottom {
+			margin-top: 22px;
+			padding-top: 16px;
+			border-top: 1px solid #e2e8f0;
+			text-align: center;
+			position: relative;
+			z-index: 2;
+		}
+
+		.login-bottom p {
+			margin: 0;
+			font-size: 14px;
+			color: #475569;
+		}
+
+		.login-bottom a {
+			color: #06b6d4;
+			font-weight: 700;
+			text-decoration: none;
+		}
+
+		.login-bottom a:hover {
+			text-decoration: underline;
+		}
+
+		/* ============================= */
+		/* BACK BUTTON */
+		/* ============================= */
+		.back-home {
+			position: fixed;
+			top: 20px;
+			left: 20px;
+			z-index: 50;
+		}
+
+		.back-home a {
+			display: inline-flex;
+			align-items: center;
+			gap: 10px;
+			padding: 10px 14px;
+			border-radius: 12px;
+			text-decoration: none;
+			color: #ffffff;
+			font-size: 13px;
+			font-weight: 700;
+			background: rgba(15, 23, 42, 0.70);
+			border: 1px solid rgba(255, 255, 255, 0.12);
+			backdrop-filter: blur(10px);
+			transition: all 0.25s ease;
+		}
+
+		.back-home a:hover {
+			transform: translateY(-2px);
+			border-color: rgba(34, 211, 238, 0.35);
+			box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+			color: #22d3ee;
+		}
+
+		/* ============================= */
+		/* ANIMATIONS */
+		/* ============================= */
+		@keyframes fadeLeft {
+			from { opacity: 0; transform: translateX(-40px); }
+			to { opacity: 1; transform: translateX(0); }
+		}
+
+		@keyframes fadeRight {
+			from { opacity: 0; transform: translateX(40px); }
+			to { opacity: 1; transform: translateX(0); }
+		}
+
+		@keyframes fadeDown {
+			from { opacity: 0; transform: translateY(-10px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+
+		@keyframes fadeIn {
+			from { opacity: 0; transform: scale(0.98); }
+			to { opacity: 1; transform: scale(1); }
+		}
+
+		/* ============================= */
+		/* RESPONSIVE */
+		/* ============================= */
+		@media (max-width: 950px) {
+			.login-wrapper {
+				grid-template-columns: 1fr;
+				gap: 35px;
+			}
+
+			.project-info {
+				text-align: center;
+			}
+
+			.project-info .tagline {
+				margin-left: auto;
+				margin-right: auto;
+			}
+
+			.feature-list {
+				margin-left: auto;
+				margin-right: auto;
+			}
+		}
+
+		@media (max-width: 480px) {
+			.project-info h1 {
+				font-size: 38px;
+			}
+
+			.login-card {
+				padding: 30px 22px;
+			}
+		}
+	</style>
+</head>
+
+<body class="login-page">
+
+	<!-- BACK BUTTON -->
+	<div class="back-home">
+		<a href="{{ url_for('landing') }}">
+			<i class="fa-solid fa-arrow-left"></i> Back to Home
+		</a>
+	</div>
+
+	<div class="login-wrapper">
+
+		<!-- ============================= -->
+		<!-- LEFT SIDE : PROJECT INFO -->
+		<!-- ============================= -->
+		<div class="project-info">
+			<h1>Health <span>Companion</span></h1>
+
+			<p class="tagline">
+				Health Companion is an ML-based healthcare web application built to predict risks of
+				Stroke, Diabetes and Cardiovascular Diseases, along with BMI & Calorie tracking.
+			</p>
+
+			<div class="highlight-strip">
+				<div class="strip-pill"><i class="fa-solid fa-brain"></i> Stroke</div>
+				<div class="strip-pill"><i class="fa-solid fa-droplet"></i> Diabetes</div>
+				<div class="strip-pill"><i class="fa-solid fa-heart"></i> Cardio</div>
+				<div class="strip-pill"><i class="fa-solid fa-calculator"></i> BMI</div>
+				<div class="strip-pill"><i class="fa-solid fa-fire"></i> Calories</div>
+			</div>
+
+			<div class="feature-list">
+				<div class="feature-item"><span>✔</span> ML-Based Disease Prediction Modules</div>
+				<div class="feature-item"><span>✔</span> BMI & Calorie Requirement Calculators</div>
+				<div class="feature-item"><span>✔</span> Personalized Health Reports in Dashboard</div>
+				<div class="feature-item"><span>✔</span> Secure Authentication (Login/Register)</div>
+			</div>
+		</div>
+
+		<!-- ============================= -->
+		<!-- RIGHT SIDE : LOGIN FORM -->
+		<!-- ============================= -->
+		<div class="login-card">
+
+			<div class="login-form-title">
+				{% if admin_mode %}
+				<h2>Admin Sign In 🔐</h2>
+				<p>Sign in with your application owner account</p>
+				{% else %}
+				<h2>Welcome Back 👋</h2>
+				<p>Sign in to access your dashboard</p>
+				{% endif %}
+			</div>
+
+			<form action="{{ '/admin-login' if admin_mode else url_for('login') }}" method="post">
+
+				{% if msg %}
+					<div class="msg">{{ msg }}</div>
+				{% endif %}
+
+				<div class="form-group">
+					<label><i class="fa-solid fa-user"></i> Username</label>
+					<input type="text" name="username" class="textbox" placeholder="Enter your username" required>
+				</div>
+
+				<div class="form-group">
+					<label><i class="fa-solid fa-lock"></i> Password</label>
+					<input type="password" name="password" class="textbox" placeholder="Enter your password" required>
+				</div>
+
+				<button type="submit" class="login-btn">{{ 'Admin Sign In' if admin_mode else 'Sign In' }}</button>
+			</form>
+
+			<div class="login-bottom">
+				{% if admin_mode %}
+				<p>Not an admin? <a href="{{ url_for('login') }}">Go to User Login</a></p>
+				{% else %}
+				<p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+				<p style="margin-top: 8px;">Application Owner? <a href="/admin-login">Admin Login</a></p>
+				{% endif %}
+			</div>
+
+		</div>
+	</div>
+
+</body>
+</html>

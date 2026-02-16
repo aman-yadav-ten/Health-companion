@@ -1,0 +1,635 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Cardiovascular Disease Risk - Health Companion</title>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+		<style>
+
+			
+
+
+		/* ===================================== */
+		/* GLOBAL BACKGROUND */
+		/* ===================================== */
+		body {
+			margin: 0;
+			min-height: 100vh;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+			background:
+				linear-gradient(rgba(0,0,0,0.68), rgba(0,0,0,0.68)),
+				url('{{ url_for("static", filename="bg.jpg") }}') center/cover no-repeat;
+
+			display: flex;
+			justify-content: center;
+			align-items: flex-start;
+
+			padding: 40px 22px 40px;
+			overflow-x: hidden;
+			overflow-y: auto;
+		}
+
+		/* ===================================== */
+		/* MAIN WRAPPER (LANDSCAPE 2-COLUMN) */
+		/* ===================================== */
+		.cvd-wrapper {
+			width: 100%;
+			max-width: 1400px;
+			display: grid;
+			grid-template-columns: 1.05fr 1.35fr;
+			gap: 40px;
+			align-items: start;
+			animation: pageIn 0.65s ease-out;
+		}
+
+		/* ===================================== */
+		/* LEFT PANEL - ABOUT (HIGH VISIBILITY) */
+		/* ===================================== */
+		.left-panel {
+			background: rgba(10, 20, 35, 0.76);
+			backdrop-filter: blur(12px);
+			border: 1px solid rgba(6, 182, 212, 0.35);
+			border-radius: 22px;
+			box-shadow: 0 20px 65px rgba(0,0,0,0.45);
+			padding: 34px;
+			position: relative;
+			overflow: hidden;
+			animation: fadeLeft 0.85s ease-out;
+		}
+
+		.left-panel::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			background: radial-gradient(circle at top left, rgba(6,182,212,0.25), transparent 55%);
+			pointer-events: none;
+		}
+
+		.brand-title {
+			position: relative;
+			z-index: 1;
+			margin-bottom: 12px;
+		}
+
+		.brand-title h1 {
+			margin: 0;
+			font-size: 46px;
+			line-height: 1.05;
+			font-weight: 900;
+			color: #ffffff;
+			letter-spacing: -1px;
+			text-shadow: 0 8px 30px rgba(0,0,0,0.55);
+		}
+
+		.brand-title h1 span {
+			color: #22d3ee;
+			position: relative;
+		}
+
+		.brand-title h1 span::after {
+			content: "";
+			position: absolute;
+			left: 0;
+			bottom: -7px;
+			width: 100%;
+			height: 3px;
+			border-radius: 2px;
+			background: linear-gradient(90deg, #06b6d4, #22d3ee);
+			opacity: 0.95;
+		}
+
+		.left-panel p {
+			position: relative;
+			z-index: 1;
+			margin: 14px 0 0 0;
+			color: rgba(255,255,255,0.92);
+			font-size: 15px;
+			line-height: 1.75;
+		}
+
+		.feature-grid {
+			position: relative;
+			z-index: 1;
+			margin-top: 22px;
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 14px;
+		}
+
+		.feature-card {
+			background: rgba(255,255,255,0.06);
+			border: 1px solid rgba(255,255,255,0.12);
+			border-radius: 14px;
+			padding: 14px;
+			display: flex;
+			gap: 12px;
+			align-items: flex-start;
+			transition: 0.25s ease;
+		}
+
+		.feature-card:hover {
+			transform: translateY(-3px);
+			border-color: rgba(34,211,238,0.55);
+			box-shadow: 0 14px 40px rgba(6,182,212,0.20);
+			background: rgba(255,255,255,0.09);
+		}
+
+		.feature-icon {
+			width: 40px;
+			height: 40px;
+			border-radius: 13px;
+			background: linear-gradient(135deg, #06b6d4, #0891b2);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #ffffff;
+			font-size: 16px;
+			box-shadow: 0 10px 24px rgba(6,182,212,0.25);
+			flex-shrink: 0;
+		}
+
+		.feature-text h4 {
+			margin: 0;
+			font-size: 13px;
+			font-weight: 800;
+			color: #ffffff;
+		}
+
+		.feature-text span {
+			display: block;
+			margin-top: 4px;
+			font-size: 12px;
+			color: rgba(255,255,255,0.82);
+			line-height: 1.45;
+		}
+
+		.quick-actions {
+			position: relative;
+			z-index: 1;
+			display: flex;
+			gap: 12px;
+			margin-top: 22px;
+			flex-wrap: wrap;
+		}
+
+		.quick-actions a {
+			text-decoration: none;
+			padding: 10px 16px;
+			border-radius: 10px;
+			font-weight: 800;
+			font-size: 13px;
+			transition: 0.25s ease;
+			display: inline-flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.quick-actions a.primary {
+			background: linear-gradient(135deg, #06b6d4, #0891b2);
+			color: #ffffff;
+			box-shadow: 0 12px 30px rgba(6,182,212,0.28);
+		}
+
+		.quick-actions a.primary:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 18px 44px rgba(6,182,212,0.42);
+		}
+
+		.quick-actions a.secondary {
+			background: rgba(255,255,255,0.10);
+			border: 1px solid rgba(255,255,255,0.20);
+			color: #ffffff;
+		}
+
+		.quick-actions a.secondary:hover {
+			transform: translateY(-3px);
+			border-color: rgba(34,211,238,0.55);
+			box-shadow: 0 14px 35px rgba(0,0,0,0.35);
+		}
+
+		/* ===================================== */
+		/* RIGHT PANEL - FORM (HORIZONTAL GRID) */
+		/* ===================================== */
+		.form-card {
+			background: rgba(255,255,255,0.97);
+			border-radius: 22px;
+			box-shadow: 0 20px 70px rgba(0,0,0,0.35);
+			border: 1px solid rgba(255,255,255,0.22);
+			overflow: hidden;
+			animation: fadeRight 0.85s ease-out;
+		}
+
+		.form-header {
+			background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+			color: #ffffff;
+			padding: 24px 26px;
+			text-align: center;
+			box-shadow: 0 14px 40px rgba(6,182,212,0.25);
+		}
+
+		.form-header h2 {
+			margin: 0;
+			font-size: 22px;
+			font-weight: 900;
+			letter-spacing: -0.3px;
+		}
+
+		.form-header p {
+			margin: 8px 0 0 0;
+			font-size: 13px;
+			opacity: 0.95;
+		}
+
+		.form-body {
+			padding: 24px;
+		}
+
+		.msg {
+			background: #fee2e2;
+			color: #991b1b;
+			padding: 12px 14px;
+			border-radius: 12px;
+			font-size: 13px;
+			border-left: 4px solid #dc2626;
+			margin-bottom: 18px;
+			animation: fadeDown 0.35s ease;
+		}
+
+		/* ✅ BEST CHANGE: 3 COLUMN HORIZONTAL FORM */
+		form {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 18px 18px;
+		}
+
+		.form-group {
+			display: flex;
+			flex-direction: column;
+			animation: popUp 0.45s ease-out;
+			animation-fill-mode: both;
+		}
+
+		label {
+			font-size: 13px;
+			font-weight: 800;
+			color: #0f172a;
+			margin-bottom: 7px;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			letter-spacing: 0.4px;
+		}
+
+		label::before {
+			content: "";
+			width: 7px;
+			height: 7px;
+			border-radius: 50%;
+			background: #06b6d4;
+			box-shadow: 0 0 0 4px rgba(6,182,212,0.14);
+		}
+
+		.textbox {
+			padding: 13px 15px;
+			border-radius: 12px;
+			border: 2px solid #e2e8f0;
+			background: #f8fafc;
+			font-size: 14px;
+			color: #0f172a;
+			transition: 0.25s ease;
+		}
+
+		.textbox:focus {
+			outline: none;
+			border-color: #06b6d4;
+			box-shadow: 0 0 0 4px rgba(6,182,212,0.13);
+			background: #ffffff;
+			transform: translateY(-2px);
+		}
+
+		/* Force wide blocks */
+		.span-2 {
+			grid-column: span 2;
+		}
+
+		.full-row {
+			grid-column: 1 / -1;
+		}
+
+		.btn {
+			width: 100%;
+			padding: 14px 16px;
+			border-radius: 12px;
+			border: none;
+			cursor: pointer;
+			font-weight: 900;
+			letter-spacing: 0.6px;
+			font-size: 15px;
+			background: linear-gradient(135deg, #06b6d4, #0891b2);
+			color: #ffffff;
+			box-shadow: 0 12px 30px rgba(6,182,212,0.28);
+			transition: 0.25s ease;
+		}
+
+		.btn:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 18px 44px rgba(6,182,212,0.42);
+		}
+
+		.btn:active {
+			transform: translateY(-1px);
+			box-shadow: 0 7px 18px rgba(6,182,212,0.25);
+		}
+
+		.back-link {
+			margin-top: 16px;
+			padding-top: 16px;
+			border-top: 1px solid #e2e8f0;
+			text-align: center;
+		}
+
+		.back-link a {
+			text-decoration: none;
+			font-weight: 900;
+			color: #06b6d4;
+			transition: 0.25s ease;
+		}
+
+		.back-link a:hover {
+			color: #0891b2;
+			text-decoration: underline;
+		}
+
+		/* ===================================== */
+		/* ANIMATIONS */
+		/* ===================================== */
+		@keyframes pageIn {
+			from { opacity: 0; transform: scale(0.985); }
+			to { opacity: 1; transform: scale(1); }
+		}
+
+		@keyframes fadeLeft {
+			from { opacity: 0; transform: translateX(-40px); }
+			to { opacity: 1; transform: translateX(0); }
+		}
+
+		@keyframes fadeRight {
+			from { opacity: 0; transform: translateX(40px); }
+			to { opacity: 1; transform: translateX(0); }
+		}
+
+		@keyframes fadeDown {
+			from { opacity: 0; transform: translateY(-10px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+
+		@keyframes popUp {
+			from { opacity: 0; transform: translateY(12px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+
+		.form-group:nth-child(1) { animation-delay: 0.05s; }
+		.form-group:nth-child(2) { animation-delay: 0.10s; }
+		.form-group:nth-child(3) { animation-delay: 0.15s; }
+		.form-group:nth-child(4) { animation-delay: 0.20s; }
+		.form-group:nth-child(5) { animation-delay: 0.25s; }
+		.form-group:nth-child(6) { animation-delay: 0.30s; }
+		.form-group:nth-child(7) { animation-delay: 0.35s; }
+		.form-group:nth-child(8) { animation-delay: 0.40s; }
+		.form-group:nth-child(9) { animation-delay: 0.45s; }
+		.form-group:nth-child(10) { animation-delay: 0.50s; }
+		.form-group:nth-child(11) { animation-delay: 0.55s; }
+
+		/* ===================================== */
+		/* RESPONSIVE */
+		/* ===================================== */
+		@media (max-width: 1200px) {
+			.cvd-wrapper {
+				grid-template-columns: 1fr;
+			}
+			form {
+				grid-template-columns: repeat(2, 1fr);
+			}
+		}
+
+		@media (max-width: 850px) {
+			form {
+				grid-template-columns: 1fr;
+			}
+			.feature-grid {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		@media (max-width: 480px) {
+			.brand-title h1 {
+				font-size: 34px;
+			}
+			.left-panel {
+				padding: 22px;
+			}
+			.form-body {
+				padding: 18px;
+			}
+		}
+	</style>
+</head>
+
+<body>
+
+	<div class="cvd-wrapper">
+
+		<!-- LEFT SIDE : ABOUT -->
+		<div class="left-panel">
+
+			<div class="brand-title">
+				<h1>Health <span>Companion</span></h1>
+			</div>
+
+			<p>
+				This Cardiovascular Disease assessment checks your lifestyle + body vitals
+				to predict risk level using ML-based analysis.
+			</p>
+
+			<div class="feature-grid">
+				<div class="feature-card">
+					<div class="feature-icon"><i class="fas fa-heart-pulse"></i></div>
+					<div class="feature-text">
+						<h4>Heart Risk Insights</h4>
+						<span>Risk evaluation using BP & glucose indicators</span>
+					</div>
+				</div>
+
+				<div class="feature-card">
+					<div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+					<div class="feature-text">
+						<h4>Clean Predictions</h4>
+						<span>Accurate ML model decision for health assessment</span>
+					</div>
+				</div>
+
+				<div class="feature-card">
+					<div class="feature-icon"><i class="fas fa-person-running"></i></div>
+					<div class="feature-text">
+						<h4>Lifestyle Matters</h4>
+						<span>Smoking, alcohol & activity affects risk strongly</span>
+					</div>
+				</div>
+
+				<div class="feature-card">
+					<div class="feature-icon"><i class="fas fa-shield-heart"></i></div>
+					<div class="feature-text">
+						<h4>Prevention Focus</h4>
+						<span>Early detection keeps your heart protected</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="quick-actions">
+				<a href="{{ url_for('login') }}" class="secondary">
+					<i class="fas fa-arrow-left"></i> Back to Dashboard
+				</a>
+				<a href="{{ url_for('calculate_bmi') }}" class="primary">
+					<i class="fas fa-weight-scale"></i> BMI Calculator
+				</a>
+			</div>
+
+		</div>
+
+		<!-- RIGHT SIDE : FORM -->
+		<div class="form-card">
+
+			<div class="form-header">
+				<h2><i class="fas fa-heart"></i> Cardiovascular Risk Assessment</h2>
+				<p>Fill details below (Landscape Layout)</p>
+			</div>
+
+			<div class="form-body">
+
+				{% if msg %}
+					<div class="msg">{{ msg }}</div>
+				{% endif %}
+
+				{% if auto_fetch %}
+				<!-- Auto-fetch mode: Simple submission button -->
+				<div style="text-align: center; padding: 40px 20px;">
+					<div style="background: rgba(34, 211, 238, 0.15); border-left: 4px solid #22d3ee; padding: 20px; border-radius: 6px; margin-bottom: 30px; text-align: left;">
+						<p style="margin: 0; color: #93c5fd; font-size: 14px;">
+							<i class="fas fa-info-circle"></i> <strong>Auto-Analysis Enabled:</strong> Your health profile data will be automatically fetched and used for analysis. Click the button below to analyze your cardiovascular risk.
+						</p>
+					</div>
+					<form action="{{ url_for('cardiovascular') }}" method="post" style="margin-top: 30px;">
+						<button type="submit" class="submit-btn" style="font-size: 16px; padding: 14px 40px;">
+							<i class="fas fa-heart"></i> Analyze Cardiovascular Risk
+						</button>
+					</form>
+					<div class="back-link">
+						<a href="{{ url_for('index') }}">
+							<i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+						</a>
+					</div>
+				</div>
+				{% else %}
+				<!-- Original form kept as fallback -->
+				<form action="{{ url_for('cardiovascular') }}" method="post">
+
+					<div class="form-group">
+						<label for="age1">Age</label>
+						<input id="age1" name="age1" type="number" placeholder="e.g., 45" class="textbox" required />
+					</div>
+
+					<div class="form-group">
+						<label for="gender1">Gender</label>
+						<select name="gender1" id="gender1" class="textbox" required>
+							<option value="">-- Select --</option>
+							<option value="1">Male</option>
+							<option value="2">Female</option>
+						</select>
+					</div>
+
+					<div class="form-group">
+						<label for="height">Height</label>
+						<input id="height" name="height" type="number" step="0.1" placeholder="e.g., 175" class="textbox" required />
+					</div>
+
+					<div class="form-group">
+						<label for="weight">Weight</label>
+						<input id="weight" name="weight" type="number" step="0.1" placeholder="e.g., 70" class="textbox" required />
+					</div>
+
+					<div class="form-group">
+						<label for="ap_hi">Systolic BP</label>
+						<input id="ap_hi" name="ap_hi" type="number" placeholder="e.g., 130" class="textbox" required />
+					</div>
+
+					<div class="form-group">
+						<label for="ap_lo">Diastolic BP</label>
+						<input id="ap_lo" name="ap_lo" type="number" placeholder="e.g., 85" class="textbox" required />
+					</div>
+
+					<div class="form-group">
+						<label for="cholesterol">Cholesterol</label>
+						<select name="cholesterol" id="cholesterol" class="textbox" required>
+							<option value="">-- Select --</option>
+							<option value="1">Normal</option>
+							<option value="2">Above Normal</option>
+							<option value="3">Well Above Normal</option>
+						</select>
+					</div>
+
+					<div class="form-group">
+						<label for="glu">Glucose</label>
+						<select name="glu" id="glu" class="textbox" required>
+							<option value="">-- Select --</option>
+							<option value="1">Normal</option>
+							<option value="2">Above Normal</option>
+							<option value="3">Well Above Normal</option>
+						</select>
+					</div>
+
+					<div class="form-group">
+						<label for="smoke">Smoking</label>
+						<select name="smoke" id="smoke" class="textbox" required>
+							<option value="">-- Select --</option>
+							<option value="1">Yes</option>
+							<option value="0">No</option>
+						</select>
+					</div>
+
+					<div class="form-group">
+						<label for="alco">Alcohol</label>
+						<select name="alco" id="alco" class="textbox" required>
+							<option value="">-- Select --</option>
+							<option value="1">Yes</option>
+							<option value="0">No</option>
+						</select>
+					</div>
+
+					<div class="form-group">
+						<label for="active">Physical Activity</label>
+						<select name="active" id="active" class="textbox" required>
+							<option value="">-- Select --</option>
+							<option value="1">Yes</option>
+							<option value="0">No</option>
+						</select>
+					</div>
+
+					<div class="form-group full-row">
+						<input type="submit" class="btn" value="ASSESS RISK" />
+					</div>
+
+				</form>
+				{% endif %}
+
+				<div class="back-link">
+					<a href="{{ url_for('index') }}"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+
+</body>
+</html>
