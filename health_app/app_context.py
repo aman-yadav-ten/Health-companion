@@ -23,6 +23,8 @@ import time
 import warnings
 import smtplib
 import secrets
+import urllib.error
+import urllib.request
 from io import BytesIO
 from datetime import datetime
 from functools import wraps
@@ -677,10 +679,53 @@ def is_admin():
     return get_current_user_role() == 'admin'
 
 
-def send_password_reset_otp_email(to_email, username, otp_code):
+def _send_email_via_resend(to_email, subject, text_body, html_body):
     """
-    Send password reset OTP email using SMTP env configuration.
-    Returns True on success, False on failure.
+    Send email via Resend HTTP API.
+    Returns (success: bool, message: str).
+    """
+    resend_api_key = (os.getenv('RESEND_API_KEY') or '').strip()
+    from_email = (os.getenv('RESEND_FROM_EMAIL') or os.getenv('FROM_EMAIL') or '').strip()
+    if not resend_api_key or not from_email:
+        return False, 'RESEND_API_KEY or RESEND_FROM_EMAIL/FROM_EMAIL is missing.'
+
+    payload = json.dumps(
+        {
+            'from': from_email,
+            'to': [to_email],
+            'subject': subject,
+            'text': text_body,
+            'html': html_body,
+        }
+    ).encode('utf-8')
+    req = urllib.request.Request(
+        'https://api.resend.com/emails',
+        data=payload,
+        headers={
+            'Authorization': f'Bearer {resend_api_key}',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        method='POST',
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as response:
+            status = getattr(response, 'status', 200)
+            body = response.read().decode('utf-8', errors='ignore')
+        if 200 <= int(status) < 300:
+            return True, f'Resend accepted email for {to_email}.'
+        return False, f'Resend failed with status {status}: {body}'
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode('utf-8', errors='ignore')
+        return False, f'Resend HTTP {exc.code}: {body}'
+    except Exception as exc:
+        return False, f'Resend error: {str(exc)}'
+
+
+def _send_email_via_smtp(to_email, subject, text_body, html_body):
+    """
+    Send email via SMTP configuration.
+    Returns (success: bool, message: str).
     """
     smtp_host = (os.getenv('SMTP_HOST') or '').strip()
     smtp_port = int(os.getenv('SMTP_PORT') or '587')
@@ -689,15 +734,54 @@ def send_password_reset_otp_email(to_email, username, otp_code):
     from_email = (os.getenv('FROM_EMAIL') or smtp_username or '').strip()
 
     if not smtp_host or not from_email:
-        logging.warning("SMTP not configured. Cannot send OTP email to %s", to_email)
-        return False
+        return False, 'SMTP_HOST or FROM_EMAIL is missing.'
 
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = 'Health Companion Password Reset OTP'
+    msg['Subject'] = subject
     msg['From'] = from_email
     msg['To'] = to_email
+    msg.attach(MIMEText(text_body, 'plain'))
+    msg.attach(MIMEText(html_body, 'html'))
 
+    try:
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=20) as server:
+            server.ehlo()
+            if str(os.getenv('SMTP_USE_TLS', '1')).lower() in ('1', 'true', 'yes'):
+                server.starttls()
+                server.ehlo()
+            if smtp_username:
+                server.login(smtp_username, smtp_password)
+            server.sendmail(from_email, [to_email], msg.as_string())
+        return True, f'SMTP sent email to {to_email}.'
+    except Exception as exc:
+        return False, f'SMTP error: {str(exc)}'
+
+
+def _send_email(to_email, subject, text_body, html_body):
+    """
+    Preferred transport: Resend API if configured, otherwise SMTP.
+    Falls back to SMTP if Resend is configured but fails.
+    """
+    resend_configured = bool((os.getenv('RESEND_API_KEY') or '').strip())
+    if resend_configured:
+        ok, message = _send_email_via_resend(to_email, subject, text_body, html_body)
+        if ok:
+            return True, message
+        logging.error("Resend send failed for %s: %s", to_email, message)
+        smtp_ok, smtp_message = _send_email_via_smtp(to_email, subject, text_body, html_body)
+        if smtp_ok:
+            return True, smtp_message
+        return False, f'{message}; {smtp_message}'
+    return _send_email_via_smtp(to_email, subject, text_body, html_body)
+
+
+def send_password_reset_otp_email(to_email, username, otp_code):
+    """
+    Send password reset OTP email using SMTP env configuration.
+    Returns True on success, False on failure.
+    """
     now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    subject = 'Health Companion Password Reset OTP'
     text_body = (
         f"Hello {username},\n\n"
         f"Your OTP for password reset is: {otp_code}\n"
@@ -714,22 +798,10 @@ def send_password_reset_otp_email(to_email, username, otp_code):
         "<p>If you did not request this, you can ignore this email.</p>"
     )
 
-    msg.attach(MIMEText(text_body, 'plain'))
-    msg.attach(MIMEText(html_body, 'html'))
-
-    try:
-        with smtplib.SMTP(smtp_host, smtp_port, timeout=20) as server:
-            server.ehlo()
-            if str(os.getenv('SMTP_USE_TLS', '1')).lower() in ('1', 'true', 'yes'):
-                server.starttls()
-                server.ehlo()
-            if smtp_username:
-                server.login(smtp_username, smtp_password)
-            server.sendmail(from_email, [to_email], msg.as_string())
-        return True
-    except Exception as exc:
-        logging.exception("Failed to send OTP email to %s: %s", to_email, str(exc))
-        return False
+    ok, message = _send_email(to_email, subject, text_body, html_body)
+    if not ok:
+        logging.error("Failed to send password reset OTP email to %s: %s", to_email, message)
+    return ok
 
 
 def issue_password_reset_otp(user_id, email):
@@ -788,22 +860,8 @@ def send_registration_otp_email(to_email, username, otp_code):
     Send registration OTP email using SMTP env configuration.
     Returns True on success, False on failure.
     """
-    smtp_host = (os.getenv('SMTP_HOST') or '').strip()
-    smtp_port = int(os.getenv('SMTP_PORT') or '587')
-    smtp_username = (os.getenv('SMTP_USERNAME') or '').strip()
-    smtp_password = os.getenv('SMTP_PASSWORD') or ''
-    from_email = (os.getenv('FROM_EMAIL') or smtp_username or '').strip()
-
-    if not smtp_host or not from_email:
-        logging.warning("SMTP not configured. Cannot send registration OTP email to %s", to_email)
-        return False
-
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = 'Health Companion Registration OTP'
-    msg['From'] = from_email
-    msg['To'] = to_email
-
     now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    subject = 'Health Companion Registration OTP'
     text_body = (
         f"Hello {username},\n\n"
         f"Your OTP for account registration is: {otp_code}\n"
@@ -820,70 +878,34 @@ def send_registration_otp_email(to_email, username, otp_code):
         "<p>If you did not request this, you can ignore this email.</p>"
     )
 
-    msg.attach(MIMEText(text_body, 'plain'))
-    msg.attach(MIMEText(html_body, 'html'))
-
-    try:
-        with smtplib.SMTP(smtp_host, smtp_port, timeout=20) as server:
-            server.ehlo()
-            if str(os.getenv('SMTP_USE_TLS', '1')).lower() in ('1', 'true', 'yes'):
-                server.starttls()
-                server.ehlo()
-            if smtp_username:
-                server.login(smtp_username, smtp_password)
-            server.sendmail(from_email, [to_email], msg.as_string())
-        return True
-    except Exception as exc:
-        logging.exception("Failed to send registration OTP email to %s: %s", to_email, str(exc))
-        return False
+    ok, message = _send_email(to_email, subject, text_body, html_body)
+    if not ok:
+        logging.error("Failed to send registration OTP email to %s: %s", to_email, message)
+    return ok
 
 
 def send_smtp_test_email(to_email):
     """
-    Send a simple SMTP test email using current environment configuration.
+    Send a provider test email using current environment configuration.
     Returns (success: bool, message: str).
     """
-    smtp_host = (os.getenv('SMTP_HOST') or '').strip()
-    smtp_port = int(os.getenv('SMTP_PORT') or '587')
-    smtp_username = (os.getenv('SMTP_USERNAME') or '').strip()
-    smtp_password = os.getenv('SMTP_PASSWORD') or ''
-    from_email = (os.getenv('FROM_EMAIL') or smtp_username or '').strip()
-
-    if not smtp_host or not from_email:
-        return False, 'SMTP_HOST or FROM_EMAIL is missing.'
-
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = 'Health Companion SMTP Test'
-    msg['From'] = from_email
-    msg['To'] = to_email
-
+    subject = 'Health Companion Email Provider Test'
     now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     text_body = (
-        "SMTP test successful.\n\n"
+        "Email provider test successful.\n\n"
         f"Sent at: {now_str}\n"
-        "If you received this email, your SMTP settings are working."
+        "If you received this email, your email provider settings are working."
     )
     html_body = (
-        "<p><strong>SMTP test successful.</strong></p>"
+        "<p><strong>Email provider test successful.</strong></p>"
         f"<p>Sent at: {now_str}</p>"
-        "<p>If you received this email, your SMTP settings are working.</p>"
+        "<p>If you received this email, your email provider settings are working.</p>"
     )
-    msg.attach(MIMEText(text_body, 'plain'))
-    msg.attach(MIMEText(html_body, 'html'))
-
-    try:
-        with smtplib.SMTP(smtp_host, smtp_port, timeout=20) as server:
-            server.ehlo()
-            if str(os.getenv('SMTP_USE_TLS', '1')).lower() in ('1', 'true', 'yes'):
-                server.starttls()
-                server.ehlo()
-            if smtp_username:
-                server.login(smtp_username, smtp_password)
-            server.sendmail(from_email, [to_email], msg.as_string())
-        return True, f'Test email sent to {to_email}.'
-    except Exception as exc:
-        logging.exception("SMTP test email failed for %s: %s", to_email, str(exc))
-        return False, f'Failed to send test email: {str(exc)}'
+    ok, message = _send_email(to_email, subject, text_body, html_body)
+    if not ok:
+        logging.error("Email provider test failed for %s: %s", to_email, message)
+        return False, f'Failed to send test email: {message}'
+    return True, f'Test email sent to {to_email} using configured provider.'
 
 
 def issue_registration_otp(username, email, password):

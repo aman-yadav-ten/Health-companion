@@ -2,13 +2,13 @@ from .app_context import *
 
 def smtp_test():
     """
-    Lightweight SMTP verification endpoint.
+    Lightweight email provider verification endpoint.
     GET: Show quick usage text.
     POST: Send test email to provided address.
     """
     if request.method == 'GET':
         return (
-            "SMTP test endpoint is ready. "
+            "Email test endpoint is ready. "
             "POST form-data: to=<email> to send a test email.",
             200
         )
