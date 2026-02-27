@@ -19,5 +19,7 @@ services:
         value: /tmp/health_companion.db
       - key: ALLOW_LOCAL_OTP_FALLBACK
         value: "0"
+      - key: DISABLE_OTP_IN_PRODUCTION
+        value: "1"
       - key: SECRET_KEY
         generateValue: true

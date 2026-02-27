@@ -101,6 +101,8 @@ python app.py
 - Email delivery uses Resend API if configured, otherwise SMTP fallback.
 - If mail delivery is unavailable in non-production mode, local OTP fallback is enabled by default for development.
   - Optional control: `ALLOW_LOCAL_OTP_FALLBACK=true|false`
+- Temporary production bypass switch:
+  - `DISABLE_OTP_IN_PRODUCTION=true` (skips OTP verification for register/reset flows)
 
 ## Models
 Expected model files in `health-models/models/`:

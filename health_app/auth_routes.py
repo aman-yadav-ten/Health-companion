@@ -15,6 +15,16 @@ def _allow_local_otp_fallback():
     return app_env not in ('production', 'prod')
 
 
+def _otp_bypass_enabled():
+    """
+    Temporarily bypass OTP checks in production when explicitly enabled.
+    """
+    app_env = (os.getenv('APP_ENV') or os.getenv('FLASK_ENV') or 'development').strip().lower()
+    if app_env not in ('production', 'prod'):
+        return False
+    return str(os.getenv('DISABLE_OTP_IN_PRODUCTION', '0')).strip().lower() in ('1', 'true', 'yes')
+
+
 def login():
     """
     Handle user login.
@@ -150,6 +160,16 @@ def forgot_password():
                     email=''
                 )
 
+            if _otp_bypass_enabled():
+                return render_template(
+                    'auth/forgot_password.html',
+                    msg='OTP is temporarily bypassed in production. Enter new password to continue.',
+                    status='success',
+                    admin_mode=admin_mode,
+                    step='verify',
+                    email=account['email']
+                )
+
             otp_code = issue_password_reset_otp(account['id'], account['email'])
             email_sent = send_password_reset_otp_email(account['email'], account['username'], otp_code)
             if not email_sent:
@@ -180,7 +200,18 @@ def forgot_password():
             )
 
         if action == 'verify_otp':
-            if not email or not otp_code or not new_password or not confirm_password:
+            if _otp_bypass_enabled():
+                if not email or not new_password or not confirm_password:
+                    conn.close()
+                    return render_template(
+                        'auth/forgot_password.html',
+                        msg='Please fill email and both password fields.',
+                        status='error',
+                        admin_mode=admin_mode,
+                        step='verify',
+                        email=email
+                    )
+            elif not email or not otp_code or not new_password or not confirm_password:
                 conn.close()
                 return render_template(
                     'auth/forgot_password.html',
@@ -254,17 +285,18 @@ def forgot_password():
                     email=email
                 )
 
-            verified, verify_msg = verify_password_reset_otp(account['id'], otp_code)
-            if not verified:
-                conn.close()
-                return render_template(
-                    'auth/forgot_password.html',
-                    msg=verify_msg,
-                    status='error',
-                    admin_mode=admin_mode,
-                    step='verify',
-                    email=email
-                )
+            if not _otp_bypass_enabled():
+                verified, verify_msg = verify_password_reset_otp(account['id'], otp_code)
+                if not verified:
+                    conn.close()
+                    return render_template(
+                        'auth/forgot_password.html',
+                        msg=verify_msg,
+                        status='error',
+                        admin_mode=admin_mode,
+                        step='verify',
+                        email=email
+                    )
 
             cursor.execute(
                 'UPDATE users SET password_hash = ? WHERE id = ?',
@@ -332,63 +364,149 @@ def register():
                     step = 'request'
                 else:
                     otp_value = issue_registration_otp(username, email, password)
-                    email_sent = send_registration_otp_email(email, username, otp_value)
-                    if not email_sent:
-                        msg = 'Could not send OTP email. Check SMTP settings and try again.'
-                        status = 'error'
-                        step = 'request'
-                    else:
-                        msg = 'OTP sent to your email. Enter OTP to complete registration.'
+                    if _otp_bypass_enabled():
+                        msg = 'OTP is temporarily bypassed in production. Continue to complete registration.'
                         status = 'success'
                         step = 'verify'
+                    else:
+                        email_sent = send_registration_otp_email(email, username, otp_value)
+                        if not email_sent:
+                            msg = 'Could not send OTP email. Check SMTP settings and try again.'
+                            status = 'error'
+                            step = 'request'
+                        else:
+                            msg = 'OTP sent to your email. Enter OTP to complete registration.'
+                            status = 'success'
+                            step = 'verify'
 
         elif action == 'verify_otp':
-            if not username or not email or not otp_code:
-                msg = 'Please provide username, email, and OTP.'
-                status = 'error'
-                step = 'verify'
-            elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
-                msg = 'Invalid email address !'
-                status = 'error'
-                step = 'verify'
-            elif not re.match(r'^[A-Za-z0-9_]{3,30}$', username):
-                msg = 'Invalid username.'
-                status = 'error'
-                step = 'verify'
+            if _otp_bypass_enabled():
+                if not username or not email:
+                    msg = 'Please provide username and email.'
+                    status = 'error'
+                    step = 'verify'
+                    return render_template(
+                        'auth/register.html',
+                        msg=msg,
+                        status=status,
+                        step=step if step in ('request', 'verify') else 'request',
+                        admin_mode=admin_mode,
+                        username=username,
+                        email=email
+                    )
+            else:
+                if not username or not email or not otp_code:
+                    msg = 'Please provide username, email, and OTP.'
+                    status = 'error'
+                    step = 'verify'
+                    return render_template(
+                        'auth/register.html',
+                        msg=msg,
+                        status=status,
+                        step=step if step in ('request', 'verify') else 'request',
+                        admin_mode=admin_mode,
+                        username=username,
+                        email=email
+                    )
+                if not re.match(r'[^@]+@[^@]+\.[^@]+', email):
+                    msg = 'Invalid email address !'
+                    status = 'error'
+                    step = 'verify'
+                    return render_template(
+                        'auth/register.html',
+                        msg=msg,
+                        status=status,
+                        step=step if step in ('request', 'verify') else 'request',
+                        admin_mode=admin_mode,
+                        username=username,
+                        email=email
+                    )
+                if not re.match(r'^[A-Za-z0-9_]{3,30}$', username):
+                    msg = 'Invalid username.'
+                    status = 'error'
+                    step = 'verify'
+                    return render_template(
+                        'auth/register.html',
+                        msg=msg,
+                        status=status,
+                        step=step if step in ('request', 'verify') else 'request',
+                        admin_mode=admin_mode,
+                        username=username,
+                        email=email
+                    )
+
+            if _otp_bypass_enabled():
+                connection = get_db_connection()
+                cursor = connection.cursor()
+                cursor.execute(
+                    '''
+                    SELECT id, password_hash
+                    FROM registration_otp
+                    WHERE username = ? AND email = ? AND consumed = 0
+                    ORDER BY id DESC
+                    LIMIT 1
+                    ''',
+                    (username, email)
+                )
+                otp_record = cursor.fetchone()
+                connection.close()
+                if not otp_record:
+                    msg = 'Registration session expired. Please request again.'
+                    status = 'error'
+                    step = 'request'
+                    return render_template(
+                        'auth/register.html',
+                        msg=msg,
+                        status=status,
+                        step=step if step in ('request', 'verify') else 'request',
+                        admin_mode=admin_mode,
+                        username=username,
+                        email=email
+                    )
+                password_hash = otp_record['password_hash']
             else:
                 verified, verify_msg, password_hash = verify_registration_otp(username, email, otp_code)
                 if not verified:
                     msg = verify_msg
                     status = 'error'
                     step = 'verify'
-                else:
-                    connection = get_db_connection()
-                    cursor = connection.cursor()
-                    cursor.execute('SELECT id FROM users WHERE username = ? OR email = ?', (username, email))
-                    existing = cursor.fetchone()
-                    if existing:
-                        connection.close()
-                        msg = 'Account already exists !'
-                        status = 'error'
-                        step = 'request'
-                    else:
-                        role_to_assign = 'admin' if admin_mode else 'user'
+                    return render_template(
+                        'auth/register.html',
+                        msg=msg,
+                        status=status,
+                        step=step if step in ('request', 'verify') else 'request',
+                        admin_mode=admin_mode,
+                        username=username,
+                        email=email
+                    )
 
-                        cursor.execute(
-                            'INSERT INTO users (username, email, password_hash, role, is_active) VALUES (?, ?, ?, ?, 1)',
-                            (username, email, password_hash, role_to_assign)
-                        )
-                        cursor.execute(
-                            'UPDATE registration_otp SET consumed = 1 WHERE username = ? OR email = ?',
-                            (username, email)
-                        )
-                        connection.commit()
-                        connection.close()
+            connection = get_db_connection()
+            cursor = connection.cursor()
+            cursor.execute('SELECT id FROM users WHERE username = ? OR email = ?', (username, email))
+            existing = cursor.fetchone()
+            if existing:
+                connection.close()
+                msg = 'Account already exists !'
+                status = 'error'
+                step = 'request'
+            else:
+                role_to_assign = 'admin' if admin_mode else 'user'
 
-                        if role_to_assign == 'admin':
-                            final_msg = 'Admin account registered successfully via OTP. Please sign in.'
-                            return redirect(url_for('admin_login', msg=final_msg))
-                        return redirect(url_for('login', msg='You have successfully registered! Please sign in.'))
+                cursor.execute(
+                    'INSERT INTO users (username, email, password_hash, role, is_active) VALUES (?, ?, ?, ?, 1)',
+                    (username, email, password_hash, role_to_assign)
+                )
+                cursor.execute(
+                    'UPDATE registration_otp SET consumed = 1 WHERE username = ? OR email = ?',
+                    (username, email)
+                )
+                connection.commit()
+                connection.close()
+
+                if role_to_assign == 'admin':
+                    final_msg = 'Admin account registered successfully. Please sign in.'
+                    return redirect(url_for('admin_login', msg=final_msg))
+                return redirect(url_for('login', msg='You have successfully registered! Please sign in.'))
         else:
             msg = 'Invalid registration action.'
             status = 'error'
