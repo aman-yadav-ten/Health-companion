@@ -10,6 +10,8 @@ health_companion.db-shm
 health_companion.db-wal
 database/health_companion.db
 health-models/cardio_model.pkl
+health-models/models/cardio_model.pkl
+health-models/models/cardio_random_forest_model.pkl
 
 # Backups and generated artifacts
 backups/

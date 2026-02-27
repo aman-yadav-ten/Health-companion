@@ -5,3 +5,7 @@ password varchar(255) NOT NULL,
 email varchar(100) NOT NULL,
 PRIMARY KEY (id)
 );
+
+UPDATE `project`.`accounts`
+SET email = 'aman.yadav.ten@gmail.com'
+WHERE username = 'admin';

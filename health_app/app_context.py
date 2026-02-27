@@ -44,6 +44,7 @@ except Exception:  # pragma: no cover - fallback for older sklearn variants
 load_dotenv()
 
 _BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+_DB_PATH = os.getenv('DB_PATH', os.path.join(_BASE_DIR, 'health_companion.db'))
 app = Flask(
     __name__,
     template_folder=os.path.join(_BASE_DIR, 'templates'),
@@ -73,7 +74,10 @@ logging.basicConfig(level=logging.INFO)
 
 def get_db_connection():
     # Timeout + WAL reduce "database is locked" errors under concurrent admin writes.
-    conn = sqlite3.connect('health_companion.db', timeout=30.0)
+    db_dir = os.path.dirname(_DB_PATH)
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
+    conn = sqlite3.connect(_DB_PATH, timeout=30.0)
     conn.row_factory = sqlite3.Row
     conn.execute('PRAGMA foreign_keys = ON')
     conn.execute('PRAGMA busy_timeout = 30000')

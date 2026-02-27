@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin User Detail - Health Companion</title>
+    <style>
+        :root {
+            --bg1: #081625;
+            --bg2: #10253f;
+            --card: rgba(15, 23, 42, 0.78);
+            --border: rgba(255,255,255,0.13);
+            --muted: #94a3b8;
+            --text: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: radial-gradient(circle at top left, var(--bg2), var(--bg1) 70%); color: var(--text); }
+        .nav { position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 20px; background: rgba(7, 12, 24, 0.75); border-bottom: 1px solid var(--border); backdrop-filter: blur(10px); flex-wrap: wrap; }
+        .brand { color: #22d3ee; font-weight: 800; }
+        .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+        .nav a { color: var(--text); text-decoration: none; font-size: 13px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; background: rgba(255,255,255,0.06); }
+        .wrap { max-width: 1250px; margin: 18px auto; padding: 0 16px 24px; }
+        .header h1 { color: #fff; font-size: 26px; }
+        .header p { margin-top: 6px; color: var(--muted); font-size: 14px; }
+        .msg { margin-top: 12px; padding: 10px 12px; border-radius: 10px; font-size: 13px; border: 1px solid transparent; }
+        .msg.success { background: rgba(16,185,129,.18); border-color: rgba(16,185,129,.4); color: #6ee7b7; }
+        .msg.error { background: rgba(239,68,68,.18); border-color: rgba(239,68,68,.4); color: #fecaca; }
+        .panel { margin-top: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
+        .panel h2 { font-size: 18px; margin-bottom: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+        .item { border: 1px solid rgba(255,255,255,.1); border-radius: 10px; background: rgba(2,6,23,.45); padding: 10px; font-size: 13px; }
+        .item strong { display: block; color: var(--muted); font-size: 11px; margin-bottom: 4px; }
+        .danger { border-color: rgba(239,68,68,.45); background: rgba(127,29,29,.14); }
+        .controls { display: flex; gap: 10px; flex-wrap: wrap; }
+        form { display: inline-block; }
+        .btn { border: none; border-radius: 10px; padding: 10px 12px; font-weight: 700; cursor: pointer; }
+        .btn.warn { background: #f59e0b; color: #111827; }
+        .btn.danger { background: #ef4444; color: #fff; }
+        .muted { color: var(--muted); font-size: 13px; }
+        @media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+        @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <div class="brand">Health Companion Admin</div>
+    <div class="nav-links">
+        <a href="{{ url_for('admin_dashboard') }}">Overview</a>
+        <a href="{{ url_for('admin_users') }}">Users</a>
+        <a href="{{ url_for('admin_predictions') }}">Predictions</a>
+        <a href="{{ url_for('admin_logs') }}">Logs</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</div>
+
+<div class="wrap">
+    <div class="header">
+        <h1>User Detail: {{ user.username }}</h1>
+        <p>Read-only profile inspection with guarded account actions.</p>
+        {% if msg %}
+        <div class="msg {{ 'success' if status == 'success' else 'error' }}">{{ msg }}</div>
+        {% endif %}
+    </div>
+
+    <div class="panel">
+        <h2>Account Summary</h2>
+        <div class="grid">
+            <div class="item"><strong>User ID</strong>{{ user.id }}</div>
+            <div class="item"><strong>Email</strong>{{ user.email }}</div>
+            <div class="item"><strong>Role</strong>{{ user.role }}</div>
+            <div class="item"><strong>Status</strong>{{ 'Active' if user.is_active == 1 else 'Inactive' }}</div>
+            <div class="item"><strong>Created</strong>{{ user.created_at }}</div>
+            <div class="item"><strong>Stroke Predictions</strong>{{ stroke_count }}</div>
+            <div class="item"><strong>Diabetes Predictions</strong>{{ diabetes_count }}</div>
+            <div class="item"><strong>Cardio Predictions</strong>{{ cardio_count }}</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>Profile Snapshot</h2>
+        {% if profile %}
+        <div class="grid">
+            {% for key, value in profile.items() %}
+            <div class="item"><strong>{{ key }}</strong>{{ value }}</div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="muted">No profile saved for this user.</p>
+        {% endif %}
+    </div>
+
+    <div class="panel danger">
+        <h2>Danger Zone</h2>
+        <p class="muted" style="margin-bottom:10px;">These actions are destructive. Confirm prompts before proceeding.</p>
+        <div class="controls">
+            <form method="post" action="{{ url_for('admin_toggle_user_active', target_user_id=user.id) }}" onsubmit="return confirm('Are you sure you want to change active status for this user?');">
+                <input type="hidden" name="confirm" value="yes">
+                <button class="btn warn" type="submit">{{ 'Deactivate User' if user.is_active == 1 else 'Reactivate User' }}</button>
+            </form>
+
+            <form method="post" action="{{ url_for('admin_delete_user', target_user_id=user.id) }}" onsubmit="return confirm('Permanently delete this user and all related data? This cannot be undone.');">
+                <input type="hidden" name="confirm" value="yes">
+                <button class="btn danger" type="submit">Delete User Permanently</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
