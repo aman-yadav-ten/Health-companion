@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cardiovascular Disease - Health Companion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+
+
+
+/* ==================================================
+   GLOBAL BACKGROUND
+   ================================================== */
+body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+        linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+        url('{{ url_for("static", filename="bg.jpg") }}') center/cover no-repeat;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* ==================================================
+   MAIN LANDSCAPE CONTAINER
+   ================================================== */
+.page-container {
+    width: 100%;
+    max-width: 1300px;
+    background: rgba(255,255,255,0.94);
+    backdrop-filter: blur(12px);
+    border-radius: 18px;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.3);
+    padding: 40px 45px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ==================================================
+   HEADER
+   ================================================== */
+.page-header {
+    border-bottom: 3px solid #06b6d4;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+}
+
+.page-header h1 {
+    font-size: 32px;
+    color: #0f172a;
+    margin: 0;
+}
+
+.page-header span {
+    color: #06b6d4;
+    font-weight: 700;
+}
+
+/* ==================================================
+   LANDSCAPE GRID
+   ================================================== */
+.content-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1.4fr;
+    gap: 35px;
+}
+
+/* ==================================================
+   LEFT PANEL – OVERVIEW & TYPES
+   ================================================== */
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.info-card {
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 25px;
+    border-left: 5px solid #06b6d4;
+}
+
+.info-card h2 {
+    margin-top: 0;
+    font-size: 20px;
+    color: #0f172a;
+    margin-bottom: 10px;
+}
+
+.info-card p {
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.info-card ul {
+    padding-left: 18px;
+}
+
+.info-card li {
+    font-size: 14px;
+    color: #475569;
+    margin-bottom: 8px;
+}
+
+/* ==================================================
+   RIGHT PANEL – TYPES & RISK FACTORS
+   ================================================== */
+.right-panel {
+    display: grid;
+    grid-template-rows: auto auto auto;
+    gap: 20px;
+}
+
+.section-box {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 22px;
+    border: 1px solid #e2e8f0;
+}
+
+.section-box h3 {
+    margin-top: 0;
+    font-size: 18px;
+    color: #0f172a;
+    margin-bottom: 10px;
+}
+
+.section-box p {
+    font-size: 14px;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.section-box ul {
+    padding-left: 18px;
+}
+
+.section-box li {
+    font-size: 13.5px;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+/* ==================================================
+   FOOTER ACTIONS
+   ================================================== */
+.footer-actions {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.footer-actions a {
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.footer-actions .learn {
+    background: #f0f9fa;
+    color: #06b6d4;
+    border: 2px solid #06b6d4;
+}
+
+.footer-actions .learn:hover {
+    background: #06b6d4;
+    color: #ffffff;
+}
+
+.footer-actions .back {
+    background: #06b6d4;
+    color: #ffffff;
+}
+
+.footer-actions .back:hover {
+    background: #0891b2;
+}
+
+.footer-actions .logout {
+    background: #64748b;
+    color: #ffffff;
+}
+
+.footer-actions .logout:hover {
+    background: #475569;
+}
+
+/* ==================================================
+   RESPONSIVE
+   ================================================== */
+@media (max-width: 950px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="page-container">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <h1>Cardiovascular <span>Disease</span></h1>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content-grid">
+
+        <!-- LEFT PANEL -->
+        <div class="left-panel">
+
+            <div class="info-card">
+                <h2>What is Cardiovascular Disease?</h2>
+                <p>
+                    Cardiovascular disease (CVD) refers to conditions affecting the heart
+                    and blood vessels. It is commonly caused by a buildup of fatty deposits
+                    in arteries and significantly increases the risk of heart attack and stroke.
+                </p>
+            </div>
+
+            <div class="info-card">
+                <h2>Major Types of CVD</h2>
+                <ul>
+                    <li><strong>Coronary Heart Disease:</strong> Reduced blood flow to the heart muscle.</li>
+                    <li><strong>Stroke & TIA:</strong> Disrupted blood supply to the brain.</li>
+                    <li><strong>Peripheral Arterial Disease:</strong> Blocked arteries in the legs.</li>
+                    <li><strong>Aortic Disease:</strong> Weakening or enlargement of the aorta.</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="right-panel">
+
+            <div class="section-box">
+                <h3>Medical Risk Factors</h3>
+                <ul>
+                    <li>High blood pressure</li>
+                    <li>High cholesterol</li>
+                    <li>Diabetes</li>
+                    <li>Heart disease</li>
+                </ul>
+            </div>
+
+            <div class="section-box">
+                <h3>Lifestyle Risk Factors</h3>
+                <ul>
+                    <li>Smoking</li>
+                    <li>Physical inactivity</li>
+                    <li>Unhealthy diet</li>
+                    <li>Excessive alcohol intake</li>
+                </ul>
+            </div>
+
+            <div class="section-box">
+                <h3>Non-Modifiable Risk Factors</h3>
+                <ul>
+                    <li>Age</li>
+                    <li>Gender</li>
+                    <li>Family history</li>
+                    <li>Ethnic background</li>
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer-actions">
+        <a class="learn" href="https://en.wikipedia.org/wiki/Cardiovascular_disease" target="_blank">Learn More</a>
+        <a class="back" href="{{ url_for('login') }}">Back to Dashboard</a>
+        <a class="logout" href="{{ url_for('logout') }}">Logout</a>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Health Companion{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  {% include 'base/_navbar.html' %}
+  {% include 'base/_alerts.html' %}
+  {% block content %}{% endblock %}
+  {% include 'base/_footer.html' %}
+</body>
+</html>

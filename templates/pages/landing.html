@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Companion - AI Health Risk Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="landing-saas">
+<div class="lp-page">
+
+    <header class="lp-navbar" id="lpNavbar">
+        <div class="lp-container lp-nav-inner">
+            <a href="{{ url_for('landing') }}" class="lp-brand">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span>Health Companion</span>
+            </a>
+
+            <nav class="lp-nav-links" aria-label="Primary Navigation">
+                <a href="#features" class="lp-nav-link">Features</a>
+                <a href="#how-it-works" class="lp-nav-link">How It Works</a>
+                <a href="#why-us" class="lp-nav-link">Why Us</a>
+                <a href="#contact" class="lp-nav-link">Contact</a>
+            </nav>
+
+            <div class="lp-nav-actions">
+                <a href="{{ url_for('login') }}" class="lp-btn lp-btn-ghost">Login</a>
+                <a href="{{ url_for('forgot_password') }}" class="lp-btn lp-btn-secondary">Reset Password</a>
+                <a href="{{ url_for('register') }}" class="lp-btn lp-btn-primary">Start Assessment</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="lp-hero">
+            <div class="lp-container lp-hero-grid">
+                <div class="lp-hero-content lp-reveal">
+                    <p class="lp-eyebrow">AI-Powered Preventive Healthcare</p>
+                    <h1>Predict health risks early with a professional <span>health-tech platform</span></h1>
+                    <p class="lp-hero-subtitle">
+                        Evaluate stroke, diabetes, and cardiovascular risk with machine learning models,
+                        personalized guidance, and instant report generation.
+                    </p>
+
+                    <div class="lp-hero-actions">
+                        <a href="{{ url_for('register') }}" class="lp-btn lp-btn-primary">Start Assessment</a>
+                        <a href="{{ url_for('login') }}" class="lp-btn lp-btn-secondary">Login</a>
+                    </div>
+
+                    <div class="lp-trust-badges" aria-label="Trust Badges">
+                        <span><i class="fa-solid fa-robot"></i> AI Powered</span>
+                        <span><i class="fa-solid fa-wallet"></i> Free</span>
+                        <span><i class="fa-solid fa-shield-halved"></i> Secure</span>
+                    </div>
+                </div>
+
+                <div class="lp-hero-visual lp-reveal" aria-hidden="true">
+                    <div class="lp-illustration-card">
+                        <div class="lp-illustration-head">
+                            <div class="lp-dot"></div><div class="lp-dot"></div><div class="lp-dot"></div>
+                        </div>
+                        <div class="lp-illustration-body">
+                            <div class="lp-illustration-stat">
+                                <strong>Risk Scan</strong>
+                                <span>Cardio • Stroke • Diabetes</span>
+                            </div>
+                            <div class="lp-illustration-bars">
+                                <div><label>Cardio</label><b class="lp-bar-cardio"></b></div>
+                                <div><label>Stroke</label><b class="lp-bar-stroke"></b></div>
+                                <div><label>Diabetes</label><b class="lp-bar-diabetes"></b></div>
+                            </div>
+                            <div class="lp-illustration-chip"><i class="fa-solid fa-check"></i> Report Ready</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="lp-section lp-features">
+            <div class="lp-container">
+                <div class="lp-section-head lp-reveal">
+                    <h2>Platform Features</h2>
+                    <p>Everything needed for fast, reliable, and accessible health risk insights.</p>
+                </div>
+
+                <div class="lp-feature-grid">
+                    <article class="lp-feature-card lp-reveal">
+                        <i class="fa-solid fa-brain"></i>
+                        <h3>Stroke Risk Prediction</h3>
+                        <p>Analyze clinical and lifestyle indicators to estimate stroke risk quickly.</p>
+                    </article>
+                    <article class="lp-feature-card lp-reveal">
+                        <i class="fa-solid fa-droplet"></i>
+                        <h3>Diabetes Risk Prediction</h3>
+                        <p>Get diabetes probability using AI models trained on structured medical data.</p>
+                    </article>
+                    <article class="lp-feature-card lp-reveal">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                        <h3>Cardiovascular Prediction</h3>
+                        <p>Evaluate heart disease risk with blood pressure, glucose, and activity factors.</p>
+                    </article>
+                    <article class="lp-feature-card lp-reveal">
+                        <i class="fa-solid fa-calculator"></i>
+                        <h3>BMI & Calorie Calculator</h3>
+                        <p>Use built-in tools to monitor body metrics and daily calorie requirements.</p>
+                    </article>
+                    <article class="lp-feature-card lp-reveal">
+                        <i class="fa-solid fa-file-waveform"></i>
+                        <h3>Personalized Health Reports</h3>
+                        <p>Generate clear, downloadable reports from each completed assessment.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="how-it-works" class="lp-section lp-how">
+            <div class="lp-container">
+                <div class="lp-section-head lp-reveal">
+                    <h2>How It Works</h2>
+                    <p>Three simple steps to get your AI-powered risk report.</p>
+                </div>
+
+                <div class="lp-how-grid">
+                    <article class="lp-step lp-reveal">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <h3>Register Account</h3>
+                        <p>Create your account and sign in securely.</p>
+                    </article>
+                    <article class="lp-step lp-reveal">
+                        <i class="fa-solid fa-notes-medical"></i>
+                        <h3>Enter Health Details</h3>
+                        <p>Fill your profile once with key medical and lifestyle inputs.</p>
+                    </article>
+                    <article class="lp-step lp-reveal">
+                        <i class="fa-solid fa-chart-column"></i>
+                        <h3>Get Instant AI Report</h3>
+                        <p>Receive risk prediction and actionable recommendations immediately.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="why-us" class="lp-section lp-why">
+            <div class="lp-container">
+                <div class="lp-section-head lp-reveal">
+                    <h2>Why Choose Us</h2>
+                    <p>Built with practical healthcare value and user trust in mind.</p>
+                </div>
+
+                <div class="lp-why-grid">
+                    <div class="lp-why-item lp-reveal"><i class="fa-solid fa-microchip"></i><span>AI Based Analysis</span></div>
+                    <div class="lp-why-item lp-reveal"><i class="fa-solid fa-user-lock"></i><span>Secure & Private</span></div>
+                    <div class="lp-why-item lp-reveal"><i class="fa-solid fa-bolt"></i><span>Instant Results</span></div>
+                    <div class="lp-why-item lp-reveal"><i class="fa-solid fa-circle-check"></i><span>Free to Use</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="lp-section lp-demo">
+            <div class="lp-container lp-demo-grid">
+                <div class="lp-demo-content lp-reveal">
+                    <h2>Health Report Preview</h2>
+                    <p>Professional summary layout with risk level, probability indicators, and recommendations.</p>
+                    <a href="{{ url_for('login') }}" class="lp-btn lp-btn-secondary">View Dashboard</a>
+                </div>
+
+                <div class="lp-demo-card lp-reveal" aria-hidden="true">
+                    <header>
+                        <h3>Assessment Summary</h3>
+                        <span class="lp-demo-badge">Moderate Risk</span>
+                    </header>
+                    <div class="lp-demo-row"><label>Stroke Probability</label><div><b class="lp-demo-bar-stroke"></b></div></div>
+                    <div class="lp-demo-row"><label>Diabetes Probability</label><div><b class="lp-demo-bar-diabetes"></b></div></div>
+                    <div class="lp-demo-row"><label>Cardio Probability</label><div><b class="lp-demo-bar-cardio"></b></div></div>
+                    <p>Recommendation: Continue preventive monitoring and maintain active lifestyle.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="lp-cta lp-reveal">
+            <div class="lp-container">
+                <h2>Take control of your health today</h2>
+                <p>Start a free AI-based health risk assessment in minutes.</p>
+                <a href="{{ url_for('register') }}" class="lp-btn lp-btn-primary">Start Your Free Health Assessment</a>
+            </div>
+        </section>
+    </main>
+
+    <footer id="contact" class="lp-footer">
+        <div class="lp-container lp-footer-grid">
+            <div>
+                <h4>About</h4>
+                <a href="#">Health Companion</a>
+                <a href="#why-us">Why Choose Us</a>
+            </div>
+            <div>
+                <h4>Features</h4>
+                <a href="#features">Prediction Modules</a>
+                <a href="#how-it-works">How It Works</a>
+            </div>
+            <div>
+                <h4>Contact</h4>
+                <a href="mailto:aman.yadav.ten@gmail.com">aman.yadav.ten@gmail.com</a>
+                <a href="{{ url_for('forgot_password') }}">Account Support</a>
+            </div>
+            <div>
+                <h4>Privacy</h4>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Use</a>
+            </div>
+        </div>
+        <div class="lp-container lp-footer-bottom">
+            <p>&copy; 2026 Health Companion. All rights reserved.</p>
+            <div class="lp-socials" aria-label="Social placeholders">
+                <a href="https://linkedin.com/in/aman-yadav-ten" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                <a href="https://github.com/aman-yadav-ten" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+            </div>
+        </div>
+    </footer>
+
+</div>
+
+<script>
+(function () {
+    const navbar = document.getElementById('lpNavbar');
+    const onScroll = () => {
+        if (!navbar) return;
+        navbar.classList.toggle('scrolled', window.scrollY > 12);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.14 });
+
+    document.querySelectorAll('.lp-reveal').forEach((el) => observer.observe(el));
+})();
+</script>
+</body>
+</html>

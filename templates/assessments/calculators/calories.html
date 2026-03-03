@@ -1,0 +1,639 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Calorie Calculator - Health Companion</title>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+		<style>
+
+
+		/* ===================================== */
+		/* GLOBAL BACKGROUND */
+		/* ===================================== */
+		body {
+			margin: 0;
+			min-height: 100vh;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+
+			background:
+				linear-gradient(rgba(0,0,0,0.72), rgba(0,0,0,0.72)),
+				url('{{ url_for("static", filename="bg.jpg") }}') center/cover no-repeat;
+
+			display: flex;
+			justify-content: center;
+			align-items: flex-start; /* ✅ IMPORTANT: prevents top cut */
+			padding: 34px 22px;
+
+			overflow-x: hidden;
+			overflow-y: auto; /* ✅ IMPORTANT: allow full vertical visibility */
+		}
+
+		/* ===================================== */
+		/* MAIN LAYOUT WRAPPER */
+		/* ===================================== */
+		.calorie-wrapper {
+			width: 100%;
+			max-width: 1250px;
+			display: grid;
+			grid-template-columns: 1.12fr 1fr;
+			gap: 40px;
+			align-items: stretch; /* ✅ both sides equal height */
+			animation: pageEnter 0.7s ease-out;
+		}
+
+		/* ===================================== */
+		/* LEFT PANEL (INFO) */
+		/* ===================================== */
+		.left-panel {
+			background: rgba(10, 20, 35, 0.78);
+			border: 1px solid rgba(6, 182, 212, 0.35);
+			backdrop-filter: blur(14px);
+			border-radius: 22px;
+			padding: 32px;
+			box-shadow: 0 20px 70px rgba(0,0,0,0.45);
+			position: relative;
+			overflow: hidden;
+			animation: fadeLeft 0.9s ease-out;
+
+			/* ✅ FIX: make sure content is fully usable */
+			max-height: calc(100vh - 80px);
+			overflow-y: auto;
+		}
+
+		/* ✅ Smooth Scroll + Premium Scrollbar */
+		.left-panel::-webkit-scrollbar {
+			width: 7px;
+		}
+		.left-panel::-webkit-scrollbar-thumb {
+			background: rgba(34, 211, 238, 0.45);
+			border-radius: 10px;
+		}
+		.left-panel::-webkit-scrollbar-track {
+			background: rgba(255,255,255,0.08);
+			border-radius: 10px;
+		}
+
+		.left-panel::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			background: radial-gradient(circle at top left, rgba(6,182,212,0.25), transparent 60%);
+			pointer-events: none;
+		}
+
+		.brand {
+			position: relative;
+			z-index: 2;
+		}
+
+		.brand h1 {
+			margin: 0;
+			font-size: 48px;
+			font-weight: 900;
+			color: #ffffff;
+			letter-spacing: -1px;
+			line-height: 1.05;
+			text-shadow: 0 10px 28px rgba(0,0,0,0.6);
+		}
+
+		.brand h1 span {
+			color: #22d3ee;
+			position: relative;
+		}
+
+		.brand h1 span::after {
+			content: "";
+			position: absolute;
+			left: 0;
+			bottom: -7px;
+			width: 100%;
+			height: 3px;
+			border-radius: 3px;
+			background: linear-gradient(90deg, #06b6d4, #22d3ee);
+		}
+
+		.brand p {
+			margin: 14px 0 0 0;
+			font-size: 15px;
+			line-height: 1.7;
+			color: rgba(255,255,255,0.92);
+			max-width: 520px;
+		}
+
+		.left-cards {
+			position: relative;
+			z-index: 2;
+			margin-top: 24px;
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 14px;
+		}
+
+		.left-card {
+			background: rgba(255,255,255,0.06);
+			border: 1px solid rgba(255,255,255,0.14);
+			border-radius: 16px;
+			padding: 16px;
+			transition: 0.25s ease;
+		}
+
+		.left-card:hover {
+			transform: translateY(-3px);
+			border-color: rgba(34,211,238,0.6);
+			box-shadow: 0 16px 45px rgba(6,182,212,0.18);
+			background: rgba(255,255,255,0.09);
+		}
+
+		.left-card h4 {
+			margin: 0;
+			font-size: 13px;
+			font-weight: 900;
+			color: #ffffff;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.left-card h4 i {
+			color: #22d3ee;
+		}
+
+		.left-card p {
+			margin: 8px 0 0 0;
+			font-size: 12px;
+			line-height: 1.55;
+			color: rgba(255,255,255,0.86);
+		}
+
+		/* Activity guide */
+		.activity-guide {
+			position: relative;
+			z-index: 2;
+			margin-top: 18px;
+			padding: 16px;
+			border-radius: 16px;
+			background: rgba(255,255,255,0.06);
+			border: 1px solid rgba(255,255,255,0.14);
+		}
+
+		.activity-guide h3 {
+			margin: 0 0 10px 0;
+			font-size: 14px;
+			font-weight: 900;
+			color: #ffffff;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.activity-guide h3 i {
+			color: #22d3ee;
+		}
+
+		.activity-grid {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 10px;
+		}
+
+		.activity-pill {
+			background: rgba(255,255,255,0.08);
+			border: 1px solid rgba(255,255,255,0.12);
+			border-radius: 12px;
+			padding: 10px 12px;
+			font-size: 12px;
+			color: rgba(255,255,255,0.92);
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			transition: 0.25s ease;
+		}
+
+		.activity-pill:hover {
+			transform: translateY(-2px);
+			border-color: rgba(34,211,238,0.55);
+		}
+
+		.activity-pill strong {
+			color: #22d3ee;
+			font-weight: 900;
+		}
+
+		/* left actions */
+		.left-actions {
+			position: relative;
+			z-index: 2;
+			margin-top: 18px;
+			display: flex;
+			gap: 12px;
+			flex-wrap: wrap;
+		}
+
+		.left-actions a {
+			text-decoration: none;
+			padding: 10px 16px;
+			border-radius: 12px;
+			font-weight: 900;
+			font-size: 13px;
+			display: inline-flex;
+			align-items: center;
+			gap: 10px;
+			transition: 0.25s ease;
+		}
+
+		.left-actions a.secondary {
+			background: rgba(255,255,255,0.10);
+			border: 1px solid rgba(255,255,255,0.18);
+			color: #ffffff;
+		}
+
+		.left-actions a.secondary:hover {
+			transform: translateY(-3px);
+			border-color: rgba(34,211,238,0.6);
+			box-shadow: 0 14px 40px rgba(0,0,0,0.35);
+		}
+
+		.left-actions a.primary {
+			background: linear-gradient(135deg, #06b6d4, #0891b2);
+			color: #ffffff;
+			box-shadow: 0 12px 28px rgba(6,182,212,0.30);
+		}
+
+		.left-actions a.primary:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 18px 45px rgba(6,182,212,0.42);
+		}
+
+		/* ===================================== */
+		/* RIGHT PANEL (FORM) */
+		/* ===================================== */
+		.form-panel {
+			background: rgba(255,255,255,0.97);
+			border-radius: 22px;
+			box-shadow: 0 20px 70px rgba(0,0,0,0.40);
+			overflow: hidden;
+			border: 1px solid rgba(255,255,255,0.24);
+			animation: fadeRight 0.9s ease-out;
+
+			/* ✅ FIX: right panel also balanced */
+			max-height: calc(100vh - 80px);
+			display: flex;
+			flex-direction: column;
+		}
+
+		.form-top {
+			background: linear-gradient(135deg, #06b6d4, #0891b2);
+			color: #ffffff;
+			padding: 22px 26px;
+			text-align: center;
+		}
+
+		.form-top h2 {
+			margin: 0;
+			font-size: 22px;
+			font-weight: 950;
+			letter-spacing: -0.3px;
+		}
+
+		.form-top p {
+			margin: 8px 0 0 0;
+			font-size: 13px;
+			opacity: 0.95;
+		}
+
+		.form-body {
+			padding: 24px;
+			overflow-y: auto; /* ✅ fixed form scroll if needed */
+		}
+
+		.form-body::-webkit-scrollbar {
+			width: 7px;
+		}
+		.form-body::-webkit-scrollbar-thumb {
+			background: rgba(6, 182, 212, 0.35);
+			border-radius: 10px;
+		}
+		.form-body::-webkit-scrollbar-track {
+			background: rgba(15, 23, 42, 0.07);
+			border-radius: 10px;
+		}
+
+		.msg {
+			background: #fee2e2;
+			color: #991b1b;
+			padding: 12px 14px;
+			border-radius: 12px;
+			font-size: 13px;
+			border-left: 4px solid #dc2626;
+			margin-bottom: 16px;
+			animation: fadeDown 0.35s ease;
+		}
+
+		form {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 16px;
+		}
+
+		.field {
+			display: flex;
+			flex-direction: column;
+			animation: popUp 0.5s ease-out;
+			animation-fill-mode: both;
+		}
+
+		.field:nth-child(1) { animation-delay: 0.05s; }
+		.field:nth-child(2) { animation-delay: 0.10s; }
+		.field:nth-child(3) { animation-delay: 0.15s; }
+		.field:nth-child(4) { animation-delay: 0.20s; }
+		.field:nth-child(5) { animation-delay: 0.25s; }
+
+		label {
+			font-size: 13px;
+			font-weight: 900;
+			color: #0f172a;
+			margin-bottom: 7px;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			letter-spacing: 0.3px;
+		}
+
+		label::before {
+			content: "";
+			width: 7px;
+			height: 7px;
+			border-radius: 50%;
+			background: #06b6d4;
+			box-shadow: 0 0 0 4px rgba(6,182,212,0.14);
+		}
+
+		.textbox {
+			padding: 13px 15px;
+			border-radius: 12px;
+			border: 2px solid #e2e8f0;
+			background: #f8fafc;
+			font-size: 14px;
+			color: #0f172a;
+			transition: 0.25s ease;
+		}
+
+		.textbox:focus {
+			outline: none;
+			border-color: #06b6d4;
+			background: #ffffff;
+			box-shadow: 0 0 0 4px rgba(6,182,212,0.12);
+			transform: translateY(-2px);
+		}
+
+		.btn {
+			grid-column: 1 / -1;
+			width: 100%;
+			padding: 14px 16px;
+			border-radius: 12px;
+			border: none;
+			cursor: pointer;
+			font-weight: 950;
+			font-size: 15px;
+			letter-spacing: 0.6px;
+			background: linear-gradient(135deg, #06b6d4, #0891b2);
+			color: #ffffff;
+			box-shadow: 0 12px 28px rgba(6,182,212,0.28);
+			transition: 0.25s ease;
+			margin-top: 6px;
+		}
+
+		.btn:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 18px 44px rgba(6,182,212,0.42);
+		}
+
+		.btn:active {
+			transform: translateY(-1px);
+			box-shadow: 0 7px 18px rgba(6,182,212,0.25);
+		}
+
+		.form-footer {
+			margin-top: 16px;
+			padding-top: 16px;
+			border-top: 1px solid #e2e8f0;
+			text-align: center;
+		}
+
+		.form-footer a {
+			text-decoration: none;
+			font-weight: 900;
+			color: #06b6d4;
+			transition: 0.25s ease;
+		}
+
+		.form-footer a:hover {
+			color: #0891b2;
+			text-decoration: underline;
+		}
+
+		/* ===================================== */
+		/* ANIMATIONS */
+		/* ===================================== */
+		@keyframes pageEnter {
+			from { opacity: 0; transform: scale(0.985); }
+			to { opacity: 1; transform: scale(1); }
+		}
+
+		@keyframes fadeLeft {
+			from { opacity: 0; transform: translateX(-40px); }
+			to { opacity: 1; transform: translateX(0); }
+		}
+
+		@keyframes fadeRight {
+			from { opacity: 0; transform: translateX(40px); }
+			to { opacity: 1; transform: translateX(0); }
+		}
+
+		@keyframes fadeDown {
+			from { opacity: 0; transform: translateY(-10px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+
+		@keyframes popUp {
+			from { opacity: 0; transform: translateY(12px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+
+		/* ===================================== */
+		/* RESPONSIVE */
+		/* ===================================== */
+		@media (max-width: 1000px) {
+			body {
+				align-items: flex-start;
+				padding: 28px 18px;
+			}
+
+			.calorie-wrapper {
+				grid-template-columns: 1fr;
+			}
+
+			.left-cards {
+				grid-template-columns: 1fr;
+			}
+
+			.left-panel,
+			.form-panel {
+				max-height: unset;
+			}
+		}
+
+		@media (max-width: 520px) {
+			.brand h1 {
+				font-size: 34px;
+			}
+
+			form {
+				grid-template-columns: 1fr;
+			}
+		}
+	</style>
+</head>
+
+<body>
+
+	<div class="calorie-wrapper">
+
+		<!-- ===================================== -->
+		<!-- LEFT SIDE - CALORIE INFORMATION -->
+		<!-- ===================================== -->
+		<section class="left-panel">
+
+			<div class="brand">
+				<h1>Health <span>Companion</span></h1>
+				<p>
+					This Calorie Calculator estimates your daily calorie requirement (TDEE)
+					using your body data and activity level. It helps you manage weight,
+					fitness and health goals effectively.
+				</p>
+			</div>
+
+			<div class="left-cards">
+				<div class="left-card">
+					<h4><i class="fas fa-fire-flame-curved"></i> What is TDEE?</h4>
+					<p>
+						TDEE = Total Daily Energy Expenditure (calories your body burns in a day).
+					</p>
+				</div>
+
+				<div class="left-card">
+					<h4><i class="fas fa-dumbbell"></i> Why Activity Matters?</h4>
+					<p>
+						Higher activity means your calorie requirement increases significantly.
+					</p>
+				</div>
+
+				<div class="left-card">
+					<h4><i class="fas fa-bullseye"></i> Weight Goals</h4>
+					<p>
+						Calorie deficit = weight loss, surplus = weight gain, balanced = maintenance.
+					</p>
+				</div>
+
+				<div class="left-card">
+					<h4><i class="fas fa-heart-pulse"></i> Health Tip</h4>
+					<p>
+						Combine a balanced diet with regular exercise for better heart & metabolism health.
+					</p>
+				</div>
+			</div>
+
+			<div class="activity-guide">
+				<h3><i class="fas fa-person-walking"></i> Activity Level Guide</h3>
+				<div class="activity-grid">
+					<div class="activity-pill"><span>Sedentary</span> <strong>Little / No exercise</strong></div>
+					<div class="activity-pill"><span>Light</span> <strong>1–3 days/week</strong></div>
+					<div class="activity-pill"><span>Moderate</span> <strong>4–5 days/week</strong></div>
+					<div class="activity-pill"><span>Active</span> <strong>Daily workouts</strong></div>
+					<div class="activity-pill"><span>Extreme</span> <strong>Physical job / intense</strong></div>
+				</div>
+			</div>
+
+			<div class="left-actions">
+				<a href="{{ url_for('login') }}" class="secondary">
+					<i class="fas fa-arrow-left"></i> Back to Dashboard
+				</a>
+				<a href="{{ url_for('calculate_bmi') }}" class="primary">
+					<i class="fas fa-weight-scale"></i> BMI Calculator
+				</a>
+			</div>
+
+		</section>
+
+		<!-- ===================================== -->
+		<!-- RIGHT SIDE - CALORIE FORM -->
+		<!-- ===================================== -->
+		<section class="form-panel">
+
+			<div class="form-top">
+				<h2><i class="fas fa-fire"></i> Calorie Calculator</h2>
+				<p>Enter your details to calculate daily calories instantly</p>
+			</div>
+
+			<div class="form-body">
+
+				{% if msg %}
+					<div class="msg">{{ msg }}</div>
+				{% endif %}
+
+				<form action="{{ url_for('calculate_calories') }}" method="post">
+
+					<div class="field">
+						<label for="gender">Gender</label>
+						<select name="gender" id="gender" class="textbox" required>
+							<option value="">-- Select --</option>
+							<option value="male">Male</option>
+							<option value="female">Female</option>
+						</select>
+					</div>
+
+					<div class="field">
+						<label for="age">Age (years)</label>
+						<input id="age" name="age" type="number" placeholder="e.g., 22" class="textbox" required />
+					</div>
+
+					<div class="field">
+						<label for="weight">Weight (kg)</label>
+						<input id="weight" name="weight" type="number" step="0.1" placeholder="e.g., 70" class="textbox" required />
+					</div>
+
+					<div class="field">
+						<label for="height">Height (cm)</label>
+						<input id="height" name="height" type="number" step="0.1" placeholder="e.g., 175" class="textbox" required />
+					</div>
+
+					<div class="field" style="grid-column: 1 / -1;">
+						<label for="activity_level">Activity Level</label>
+						<select name="activity_level" id="activity_level" class="textbox" required>
+							<option value="">-- Select --</option>
+							<option value="sedentary">Sedentary (little or no exercise)</option>
+							<option value="exercise_1_3">Exercise 1-3 times per week</option>
+							<option value="exercise_4_5">Exercise 4-5 times per week</option>
+							<option value="daily_exercise">Daily exercise or intense 3-4 times/week</option>
+							<option value="intense_exercise">Intense exercise 6-7 times per week</option>
+							<option value="very_intense_exercise">Very intense exercise or physical job</option>
+						</select>
+					</div>
+
+					<button type="submit" class="btn">CALCULATE DAILY CALORIES</button>
+
+				</form>
+
+				<div class="form-footer">
+					<a href="{{ url_for('login') }}"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+				</div>
+
+			</div>
+
+		</section>
+
+	</div>
+
+</body>
+</html>

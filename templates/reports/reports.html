@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Reports - Health Companion</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="reports-dashboard">
+    <div class="reports-shell">
+        <header class="reports-navbar" id="reportsNavbar">
+            <a class="reports-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-heart-pulse"></i>
+                Health Companion
+            </a>
+            <nav class="reports-nav-links">
+                <a class="hc-nav-link" href="{{ url_for('index') }}">Dashboard</a>
+                <a class="hc-nav-link active" href="{{ url_for('reports') }}">Reports</a>
+                <a class="hc-nav-link" href="{{ url_for('profile') }}">Profile</a>
+                <a class="hc-nav-link" href="{{ url_for('logout') }}">Logout</a>
+            </nav>
+        </header>
+
+        <section class="reports-header-card fade-in">
+            <h1 class="reports-title">Health Analytics Dashboard</h1>
+            <p class="reports-subtitle">Track your Stroke, Diabetes, and Cardiovascular predictions with risk trends and actionable insights.</p>
+            <div class="reports-title-underline"></div>
+        </section>
+
+        <section class="health-section fade-in" id="cardioSection">
+            <h2 class="health-section-title"><i class="fas fa-heart"></i> Cardiovascular Risk Assessments</h2>
+            {% if assessments.cardiovascular %}
+            <div class="health-card-grid">
+                {% for assessment in assessments.cardiovascular %}
+                {% set risk_text = (assessment.risk_level or 'Moderate Risk') %}
+                {% set risk_key = 'moderate' %}
+                {% if 'low' in risk_text|lower %}
+                    {% set risk_key = 'low' %}
+                {% elif 'high' in risk_text|lower %}
+                    {% set risk_key = 'high' %}
+                {% endif %}
+                {% set probability_value = ((assessment.probability or 0) * 100)|round(1) %}
+                <article class="health-card fade-in">
+                    <div class="health-card-head">
+                        <div class="health-card-head-row">
+                            <div>
+                                <div class="health-card-name">Cardiovascular Assessment</div>
+                                <div class="health-card-date">{{ assessment.assessment_date }}</div>
+                            </div>
+                            <span class="risk-chip {{ risk_key }}">{{ risk_text }}</span>
+                        </div>
+                    </div>
+
+                    <div class="health-card-body">
+                        <div class="health-meta">
+                            <div class="health-meta-item"><div class="health-meta-key">Patient</div><div class="health-meta-val">{{ assessment.patient_data.name if assessment.patient_data and assessment.patient_data.name else username }}</div></div>
+                            <div class="health-meta-item"><div class="health-meta-key">Age</div><div class="health-meta-val">{{ assessment.patient_data.age if assessment.patient_data else 'N/A' }}</div></div>
+                            <div class="health-meta-item"><div class="health-meta-key">Systolic BP</div><div class="health-meta-val">{{ assessment.patient_data.systolic_bp if assessment.patient_data else 'N/A' }}</div></div>
+                            <div class="health-meta-item"><div class="health-meta-key">BMI</div><div class="health-meta-val">{{ "%.1f"|format(assessment.patient_data.bmi) if assessment.patient_data and assessment.patient_data.bmi is not none else 'N/A' }}</div></div>
+                        </div>
+
+                        <div class="risk-block">
+                            <div class="risk-row">
+                                <strong>Risk Probability</strong>
+                                <span>{{ probability_value }}%</span>
+                            </div>
+                            <div class="risk-progress">
+                                <div class="risk-progress-fill {{ risk_key }}" data-prob="{{ probability_value }}"></div>
+                            </div>
+                        </div>
+
+                        <div class="health-tip {{ risk_key }}">
+                            {% if risk_key == 'low' %}
+                            Maintain current routine with regular check-ups and balanced activity.
+                            {% elif risk_key == 'high' %}
+                            Prioritize clinical follow-up, blood pressure control, and lifestyle adjustments.
+                            {% else %}
+                            Improve daily activity, diet quality, and monitor vitals consistently.
+                            {% endif %}
+                        </div>
+
+                        <div class="report-preview">
+                            <p>{{ assessment.report_text }}</p>
+                        </div>
+
+                        <div class="health-card-footer">
+                            <a class="hc-btn" href="{{ url_for('download_report', assessment_type='cardiovascular', assessment_id=assessment.id) }}">
+                                <i class="fas fa-download"></i> Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="health-card-empty">
+                <i class="fas fa-heart-circle-exclamation"></i>
+                <p>No cardiovascular assessments yet.</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <section class="health-section fade-in" id="diabetesSection">
+            <h2 class="health-section-title"><i class="fas fa-droplet"></i> Diabetes Risk Assessments</h2>
+            {% if assessments.diabetes %}
+            <div class="health-card-grid">
+                {% for assessment in assessments.diabetes %}
+                {% set risk_text = (assessment.risk_level or 'Moderate Risk') %}
+                {% set risk_key = 'moderate' %}
+                {% if 'low' in risk_text|lower %}
+                    {% set risk_key = 'low' %}
+                {% elif 'high' in risk_text|lower %}
+                    {% set risk_key = 'high' %}
+                {% endif %}
+                {% set probability_value = ((assessment.probability or 0) * 100)|round(1) %}
+                <article class="health-card fade-in">
+                    <div class="health-card-head">
+                        <div class="health-card-head-row">
+                            <div>
+                                <div class="health-card-name">Diabetes Assessment</div>
+                                <div class="health-card-date">{{ assessment.assessment_date }}</div>
+                            </div>
+                            <span class="risk-chip {{ risk_key }}">{{ risk_text }}</span>
+                        </div>
+                    </div>
+
+                    <div class="health-card-body">
+                        <div class="health-meta">
+                            <div class="health-meta-item"><div class="health-meta-key">Patient</div><div class="health-meta-val">{{ assessment.patient_data.name if assessment.patient_data and assessment.patient_data.name else username }}</div></div>
+                            <div class="health-meta-item"><div class="health-meta-key">Age</div><div class="health-meta-val">{{ assessment.patient_data.age if assessment.patient_data else 'N/A' }}</div></div>
+                            <div class="health-meta-item"><div class="health-meta-key">Glucose</div><div class="health-meta-val">{{ assessment.patient_data.glucose if assessment.patient_data else 'N/A' }}</div></div>
+                            <div class="health-meta-item"><div class="health-meta-key">BMI</div><div class="health-meta-val">{{ "%.1f"|format(assessment.patient_data.bmi) if assessment.patient_data and assessment.patient_data.bmi is not none else 'N/A' }}</div></div>
+                        </div>
+
+                        <div class="risk-block">
+                            <div class="risk-row">
+                                <strong>Risk Probability</strong>
+                                <span>{{ probability_value }}%</span>
+                            </div>
+                            <div class="risk-progress">
+                                <div class="risk-progress-fill {{ risk_key }}" data-prob="{{ probability_value }}"></div>
+                            </div>
+                        </div>
+
+                        <div class="health-tip {{ risk_key }}">
+                            {% if risk_key == 'low' %}
+                            Continue preventive habits and regular glucose monitoring.
+                            {% elif risk_key == 'high' %}
+                            Consult an endocrinologist and review glucose management immediately.
+                            {% else %}
+                            Refine food choices, activity level, and periodic sugar screening.
+                            {% endif %}
+                        </div>
+
+                        <div class="report-preview">
+                            <p>{{ assessment.report_text }}</p>
+                        </div>
+
+                        <div class="health-card-footer">
+                            <a class="hc-btn" href="{{ url_for('download_report', assessment_type='diabetes', assessment_id=assessment.id) }}">
+                                <i class="fas fa-download"></i> Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="health-card-empty">
+                <i class="fas fa-droplet-slash"></i>
+                <p>No diabetes assessments yet.</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <section class="health-section fade-in" id="strokeSection">
+            <h2 class="health-section-title"><i class="fas fa-brain"></i> Stroke Risk Assessments</h2>
+            {% if assessments.stroke %}
+            <div class="health-card-grid">
+                {% for assessment in assessments.stroke %}
+                {% set risk_text = (assessment.risk_level or 'Moderate Risk') %}
+                {% set risk_key = 'moderate' %}
+                {% if 'low' in risk_text|lower %}
+                    {% set risk_key = 'low' %}
+                {% elif 'high' in risk_text|lower %}
+                    {% set risk_key = 'high' %}
+                {% endif %}
+                {% set probability_value = ((assessment.probability or 0) * 100)|round(1) %}
+                <article class="health-card fade-in">
+                    <div class="health-card-head">
+                        <div class="health-card-head-row">
+                            <div>
+                                <div class="health-card-name">Stroke Assessment</div>
+                                <div class="health-card-date">{{ assessment.assessment_date }}</div>
+                            </div>
+                            <span class="risk-chip {{ risk_key }}">{{ risk_text }}</span>
+                        </div>
+                    </div>
+
+                    <div class="health-card-body">
+                        <div class="health-meta">
+                            <div class="health-meta-item"><div class="health-meta-key">Patient</div><div class="health-meta-val">{{ assessment.patient_data.name if assessment.patient_data and assessment.patient_data.name else username }}</div></div>
+                            <div class="health-meta-item"><div class="health-meta-key">Age</div><div class="health-meta-val">{{ assessment.patient_data.age if assessment.patient_data else 'N/A' }}</div></div>
+                            <div class="health-meta-item"><div class="health-meta-key">Hypertension</div><div class="health-meta-val">{{ 'Yes' if assessment.patient_data and assessment.patient_data.hypertension else 'No' }}</div></div>
+                            <div class="health-meta-item"><div class="health-meta-key">Heart Disease</div><div class="health-meta-val">{{ 'Yes' if assessment.patient_data and assessment.patient_data.heart_disease else 'No' }}</div></div>
+                        </div>
+
+                        <div class="risk-block">
+                            <div class="risk-row">
+                                <strong>Risk Probability</strong>
+                                <span>{{ probability_value }}%</span>
+                            </div>
+                            <div class="risk-progress">
+                                <div class="risk-progress-fill {{ risk_key }}" data-prob="{{ probability_value }}"></div>
+                            </div>
+                        </div>
+
+                        <div class="health-tip {{ risk_key }}">
+                            {% if risk_key == 'low' %}
+                            Keep blood pressure and daily activity under regular control.
+                            {% elif risk_key == 'high' %}
+                            Seek medical guidance quickly and monitor neurological symptoms.
+                            {% else %}
+                            Reduce risk factors, especially smoking and sedentary routine.
+                            {% endif %}
+                        </div>
+
+                        <div class="report-preview">
+                            <p>{{ assessment.report_text }}</p>
+                        </div>
+
+                        <div class="health-card-footer">
+                            <a class="hc-btn" href="{{ url_for('download_report', assessment_type='stroke', assessment_id=assessment.id) }}">
+                                <i class="fas fa-download"></i> Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="health-card-empty">
+                <i class="fas fa-brain"></i>
+                <p>No stroke assessments yet.</p>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <script>
+        (function () {
+            const navbar = document.getElementById('reportsNavbar');
+            const onScroll = () => {
+                if (!navbar) return;
+                navbar.classList.toggle('scrolled', window.scrollY > 8);
+            };
+            window.addEventListener('scroll', onScroll, { passive: true });
+            onScroll();
+
+            const progressEls = document.querySelectorAll('.risk-progress-fill[data-prob]');
+            window.requestAnimationFrame(() => {
+                progressEls.forEach((el) => {
+                    const raw = Number(el.getAttribute('data-prob') || '0');
+                    const clamped = Math.max(0, Math.min(100, raw));
+                    el.style.width = clamped + '%';
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
