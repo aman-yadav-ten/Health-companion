@@ -360,4 +360,3 @@ python app.py
 
 ---
 
-If you deploy new updates, keep this README synchronized with route, auth, and model pipeline changes.
