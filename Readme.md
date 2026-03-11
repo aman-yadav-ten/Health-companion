@@ -1,81 +1,221 @@
 # Health Companion
 
-Health Companion is a Flask-based AI health risk prediction platform that provides:
-- Stroke risk prediction
-- Diabetes risk prediction
-- Cardiovascular disease risk prediction
-- BMI and calorie calculators
-- Profile-driven assessments
-- Downloadable PDF health reports
+Health Companion is a Flask-based AI health risk prediction platform that combines user health profiles, machine-learning risk models, and automated clinical-style reports. The application helps users understand potential risk levels for stroke, diabetes, and cardiovascular disease, and provides calculators (BMI and calories) plus downloadable PDF reports.
+
+## Academic Abstract (B.Tech Format)
+
+This project presents **Health Companion**, a web-based health risk prediction system that integrates machine learning with a patient profile-driven workflow. The system predicts risk levels for stroke, diabetes, and cardiovascular disease using supervised classification models trained on structured health datasets. A single user profile provides consistent feature inputs for all models. The application includes report generation that transforms numerical predictions into clinically styled summaries with recommendations and PDF export. The work demonstrates an end-to-end pipeline covering data preparation, comparative model training, model selection, deployment, and user-facing decision support.
+
+## Objectives
+
+- Build a unified health risk assessment platform using a single user profile
+- Train and compare multiple supervised learning models for three health conditions
+- Select the best-performing model for each condition using standard evaluation metrics
+- Deploy a production-ready Flask application with report generation and history
+- Provide a user-friendly UI for assessments, calculators, and downloadable reports
+
+## Methodology
+
+1. **Data Preparation:** Datasets are stored as CSVs in `health-models/data/` with predefined columns; each dataset aligns with corresponding profile fields (age, gender, BP, glucose, BMI, etc.).
+2. **Model Training and Selection:** Train/test split with stratification (`train_test_split`), feature standardization (`StandardScaler`), comparative evaluation across Logistic Regression, Decision Tree, Random Forest, SVM, KNN, and Naive Bayes, and selection of the best-performing model per disease using Accuracy, Precision, Recall, F1-Score, cross-validation, and ROC-AUC.
+3. **System Integration:** Flask app loads the trained model and scaler for each assessment, normalizes profile inputs to match the training schema, and stores predictions alongside patient data and report text.
+4. **Reporting:** A clinical-style report generator produces structured narratives with risk summary, inputs, findings, recommendations, and a medical disclaimer.
+
+## Evaluation Summary
+
+Evaluation is performed in the notebooks under `health-models/notebooks/` and recorded in report JSONs where available.
+
+Available report artifacts:
+
+- `health-models/reports/cardio_training_report.json`
+- `health-models/reports/latest_training_report.json` (currently stroke)
+
+Key evaluation points:
+
+- **Cardiovascular model:** Random Forest selected based on comparative metrics and cross-validation
+- **Stroke model:** Random Forest selected based on comparative metrics and cross-validation
+- **Diabetes model:** Random Forest selected (metrics and CV computed in notebook)
+
+For detailed metric tables (Accuracy, Precision, Recall, F1-Score) and ROC-AUC values, see the notebooks and report JSON files.
+
+## Limitations (Academic Context)
+
+- Dataset provenance and collection pipeline are not documented in this repository
+- Diabetes report JSON currently overwrites `latest_training_report.json` when re-run
+- Clinical validity depends on data quality and model generalization; this tool is informational only
 
 ## Live Application
 
-Production app is live at:
+Production app (Render):
 
-**https://health-companion-1xb2.onrender.com**
+`https://health-companion-1xb2.onrender.com`
 
-## Current Product Status (Important)
+## What This Project Delivers
 
-This repository currently uses:
-- User-only authentication (no admin module)
-- OTP-free authentication and password reset flow
-- CAPTCHA-protected login, registration, and password reset
-- SQLite database with automatic schema migration on startup
-- Flask server (`app.py`) for local development
-- Gunicorn via `render.yaml` for deployment
+- Profile-first health assessment flow (single health profile reused across all models)
+- Stroke, diabetes, and cardiovascular risk predictions
+- Model-driven, clinical-style report generation with PDF export
+- BMI and calorie calculators
+- Auth system with CAPTCHA and hashed passwords
+- SQLite-backed persistence with automated schema migration
 
-## Core Features
+## High-Level Architecture
 
-### 1. Authentication
-- Register with:
-  - Full Name
-  - Date of Birth
-  - Username
-  - Password
-  - CAPTCHA
-- Login with:
-  - Username
-  - Password
-  - CAPTCHA
-- Forgot Password flow:
-  - Verify identity with Full Name + DOB + Username + CAPTCHA
-  - Set new password + confirm + CAPTCHA
-  - Password stored as secure hash using `werkzeug.security.generate_password_hash`
+**Request flow (simplified):**
 
-### 2. Profile-Driven Health Assessments
-After login, user completes one health profile. Assessment routes auto-fetch profile values.
+1. User registers/logs in with CAPTCHA protection
+2. User completes a health profile (single source of truth for model input)
+3. Assessment routes auto-fetch profile values and run ML inference
+4. Prediction results + profile details are saved to history tables
+5. Health report generator builds a structured narrative report
+6. Reports are displayed in-app and can be exported to PDF
 
-Predictions available:
-- Stroke (`/stroke`)
-- Diabetes (`/diabetes`)
-- Cardiovascular (`/cardiovascular`)
+**Core modules:**
 
-### 3. Health Reports
-- View report summaries and history (`/reports`)
-- View latest consolidated report (`/report`)
-- Download PDFs (`/reports/download/<assessment_type>/<assessment_id>`)
+- `app.py`: Application entrypoint
+- `health_app/route_registry.py`: Central route registration
+- `health_app/auth_routes.py`: Auth and password reset flows
+- `health_app/page_routes.py`: Landing, dashboard, profile, reports
+- `health_app/assessment_routes.py`: Assessments and calculators
+- `health_app/app_context.py`: App config, DB, model inference helpers
+- `health_app/health_report_generator.py`: Report generation logic
 
-### 4. Calculators
+## Features
+
+### 1) Authentication
+
+- Register with full name, date of birth, username, password, CAPTCHA
+- Login with username, password, CAPTCHA
+- OTP-free password reset flow
+- Passwords hashed using `werkzeug.security.generate_password_hash`
+
+### 2) Profile-Driven Assessments
+
+All prediction routes use the **same profile**. Users fill it once, and the app automatically fetches values when they run assessments.
+
+Available assessments:
+
+- Stroke risk (`/stroke`)
+- Diabetes risk (`/diabetes`)
+- Cardiovascular risk (`/cardiovascular`)
+
+### 3) Health Reports
+
+- Per-assessment report history (`/reports`)
+- Consolidated latest report (`/report`)
+- PDF export (`/reports/download/<assessment_type>/<assessment_id>`)
+
+Reports include:
+
+- Risk summary with probability and risk band
+- Key clinical inputs and computed metrics (BMI, BP category, etc.)
+- Findings + recommended actions
+- Medical disclaimer
+
+### 4) Calculators
+
 - BMI calculator (`/calculate-bmi`)
 - Calorie calculator (`/calculate-calories`)
 
-### 5. Responsive Frontend
-- Redesigned SaaS-style landing page
-- Modern report dashboard UI
+### 5) Responsive Frontend
+
 - Mobile/tablet/desktop responsive templates
+- Landing page + dashboard-style UX
 
-## Technology Stack
+## Data and Model Training
 
-- **Backend:** Flask, Python
-- **Database:** SQLite
-- **ML/DS:** scikit-learn, pandas, numpy, scipy
-- **Visualization/Reporting:** matplotlib, seaborn, reportlab
-- **Model Persistence:** joblib (`.pkl` artifacts)
-- **Deployment:** Render + Gunicorn
+### Datasets Used (Local Assets)
+
+Datasets live in `health-models/data/` and are loaded by the training notebooks:
+
+- `stroke.csv`
+- `diabetes.csv`
+- `cardio.csv`
+
+Dataset shapes (from notebooks):
+
+- Stroke: `120000 x 11`
+- Diabetes: `120000 x 9`
+- Cardiovascular: `120000 x 12`
+
+Each dataset is preformatted so the column names match model input requirements and profile fields. The profile UI captures all features needed by each dataset (age, gender, blood pressure, glucose, BMI, etc.).
+
+### Training Approach and Model Selection
+
+Each disease model is trained using the **same comparative workflow** in its notebook:
+
+1. Load dataset from `health-models/data/`
+2. Split into train/test (`train_test_split`) with stratification
+3. Scale features (`StandardScaler`)
+4. Evaluate multiple supervised models:
+
+- Logistic Regression
+- Decision Tree
+- Random Forest
+- SVM
+- KNN
+- Naive Bayes
+
+5. Compare metrics (Accuracy, Precision, Recall, F1-Score)
+6. Cross-validation and ROC-AUC
+7. Select the best-performing model
+8. Persist model + scaler with `joblib`
+
+### Selected Models (Best Performance)
+
+- **Stroke:** Random Forest (selected in `health-models/notebooks/Stroke_Model.ipynb`)
+- **Diabetes:** Random Forest (selected in `health-models/notebooks/Diabetes_Model.ipynb`)
+- **Cardiovascular:** Random Forest (selected in `health-models/notebooks/Cardio_Model.ipynb`)
+
+Training report artifacts:
+
+- `health-models/reports/cardio_training_report.json`
+- `health-models/reports/latest_training_report.json`
+
+Notes:
+
+- `latest_training_report.json` currently contains **stroke** metrics.
+- The Diabetes notebook writes to `latest_training_report.json` (this can overwrite the stroke report if re-run).
+
+### Model Artifacts Used by the App
+
+The Flask app loads models and scalers from `health-models/models/`:
+
+- `stroke_model.pkl` + `stroke_scaler.pkl`
+- `diabetes_model.pkl` + `diabetes_scaler.pkl`
+- `cardio_model.pkl` (or `cardio_random_forest_model.pkl`) + `cardio_scaler.pkl`
+
+Inference helpers are in `health_app/app_context.py`:
+
+- `strokeml(...)`
+- `diaml(...)`
+- `cardiovascularml(...)`
+
+Cardiovascular lab values are normalized to training categories using `_normalize_cardio_lab_category`.
+
+## How the App Uses the Dataset
+
+1. The health profile captures all features present in the CSV training data.
+2. Assessment routes auto-fetch the profile and prepare a feature vector.
+3. The same feature order and scaler used in training are applied at inference.
+4. Predictions return risk levels and probabilities used by the report generator.
+
+## Database Overview
+
+SQLite database: `health_companion.db`
+
+Primary tables:
+
+- `users`: user auth credentials
+- `user_profile`: single canonical profile per user
+- `assessment_stroke`, `assessment_diabetes`, `assessment_cardiovascular`: report history
+- `account_*` tables: raw inputs by assessment for audit/history
+
+Schema is initialized and migrated at startup via `health_app/app_context.py`.
 
 ## Project Structure
 
-```text
+```
 Health-companion-main/
 ├── app.py
 ├── Readme.md
@@ -104,7 +244,12 @@ Health-companion-main/
 │   │   ├── cardio_random_forest_model.pkl
 │   │   └── cardio_scaler.pkl
 │   ├── notebooks/
+│   │   ├── Stroke_Model.ipynb
+│   │   ├── Diabetes_Model.ipynb
+│   │   └── Cardio_Model.ipynb
 │   └── reports/
+│       ├── cardio_training_report.json
+│       └── latest_training_report.json
 ├── health_app/
 │   ├── __init__.py
 │   ├── app_context.py
@@ -126,53 +271,24 @@ Health-companion-main/
     └── ss/
 ```
 
-## Entry Point and Runtime
-
-### Local Run
-```bash
-python app.py
-```
-
-Default runtime values:
-- Host: `127.0.0.1`
-- Port: `5001`
-- Debug: disabled unless `FLASK_DEBUG=1`
-
-### Production Run (Render)
-Defined in `render.yaml`:
-```bash
-gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 180
-```
-
-## Python Version
-
-Project target Python version:
-- `.python-version` => `3.11.10`
-- `render.yaml` => `PYTHON_VERSION=3.11.10`
-
-Use Python 3.11.10 for best dependency compatibility.
-
 ## Setup Instructions (Local)
 
-### 1) Clone repository
-```bash
-git clone <your-repo-url>
-cd Health-companion-main
-```
+### 1) Create virtual environment
 
-### 2) Create virtual environment
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3) Install dependencies
+### 2) Install dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4) Configure environment
-Create `.env` in project root (minimum):
+### 3) Configure environment
+
+Create `.env` in project root:
 
 ```ini
 SECRET_KEY=change-this-in-production
@@ -186,177 +302,37 @@ DB_PATH=health_companion.db
 SESSION_COOKIE_SECURE=0
 ```
 
-### 5) Start app
+### 4) Start app
+
 ```bash
 python app.py
 ```
 
-### 6) Open in browser
-```text
-http://127.0.0.1:5001
-```
+Open:
 
-## URL Routes (Current)
-
-### Public
-- `GET /`
-- `GET /landing`
-
-### Authentication
-- `GET|POST /login`
-- `GET|POST /register`
-- `GET|POST /forgot-password`
-- `GET /logout`
-
-### User Pages (login required)
-- `GET /index`
-- `GET|POST /profile`
-- `GET /output`
-- `GET /details`
-- `GET /stroke-info`
-- `GET /diabetes-info`
-- `GET /cardiovascular-info`
-- `GET /reports`
-- `GET /report`
-- `GET /reports/download/<assessment_type>/<assessment_id>`
-
-### Assessments & Tools (login required)
-- `GET|POST /stroke`
-- `GET|POST /diabetes`
-- `GET|POST /cardiovascular`
-- `GET|POST /calculate-bmi`
-- `GET|POST /calculate-calories`
-
-## Database Design (Current)
-
-SQLite file:
-- `health_companion.db` (local)
-- `/tmp/health_companion.db` on Render free tier (ephemeral)
-
-### Key tables
-- `users`
-  - `id`
-  - `full_name`
-  - `date_of_birth`
-  - `username` (unique)
-  - `password_hash`
-  - `created_at`
-- `user_profile`
-  - health profile linked to `users.id`
-- `assessment_stroke`
-- `assessment_diabetes`
-- `assessment_cardiovascular`
-- `account_stroke`, `account_dia`, `account_cardiovascular` (assessment inputs/logging)
-- `prediction_results`
-
-### Auto-migration behavior
-`run_db_migrations()` in `health_app/app_context.py`:
-- Normalizes legacy user schema to current user-only auth schema
-- Removes obsolete OTP/admin tables when present
-- Preserves profile and assessment history tables
-
-## ML Model Pipeline Details
-
-### Stroke
-- Model artifact: `health-models/models/stroke_model.pkl`
-- Scaler: `health-models/models/stroke_scaler.pkl`
-
-### Diabetes
-- Model artifact: `health-models/models/diabetes_model.pkl`
-- Scaler: `health-models/models/diabetes_scaler.pkl`
-
-### Cardiovascular
-- Model artifact preference:
-  1. `health-models/models/cardio_model.pkl`
-  2. fallback `health-models/models/cardio_random_forest_model.pkl`
-- Scaler: `health-models/models/cardio_scaler.pkl`
-
-#### Cardiovascular input normalization (important)
-Cardio model is trained with categorical lab levels:
-- `CHOLESTEROL`: 1/2/3
-- `GLUCOSE`: 1/2/3
-
-Runtime now safely normalizes profile inputs before inference:
-- If already 1/2/3, used directly
-- If provided as mg/dL, mapped to training categories:
-  - Cholesterol: `<200 => 1`, `200-239 => 2`, `>=240 => 3`
-  - Glucose: `<100 => 1`, `100-125 => 2`, `>=126 => 3`
-
-This prevents false high-risk bias from out-of-distribution numeric lab values.
-
-## Security Notes
-
-- Passwords are hashed using Werkzeug (`pbkdf2:sha256`)
-- SQL queries use parameterized statements
-- CAPTCHA enforced for:
-  - login
-  - register
-  - forgot-password identity verification
-  - forgot-password reset step
-- Session cookies configured with:
-  - `SESSION_COOKIE_HTTPONLY=True`
-  - `SESSION_COOKIE_SAMESITE='Lax'`
-  - optional `SESSION_COOKIE_SECURE`
+`http://127.0.0.1:5001`
 
 ## Deployment (Render)
 
-### Live URL
-- https://health-companion-1xb2.onrender.com
+Configured in `render.yaml`:
 
-### `render.yaml` summary
-- Service name: `health-companion`
-- Runtime: Python
-- Build command: `pip install -r requirements.txt`
-- Start command: Gunicorn
-- `PYTHON_VERSION=3.11.10`
-- `DB_PATH=/tmp/health_companion.db`
-
-### Important free-tier note
-`/tmp` storage is ephemeral. Data may reset after restarts/redeploys.
-
-## Troubleshooting
-
-### Port already in use (5001)
 ```bash
-lsof -nP -iTCP:5001 -sTCP:LISTEN
-kill <PID>
+gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 180
 ```
 
-### Cardio model file missing
-Ensure one of:
-- `health-models/models/cardio_model.pkl`
-- `health-models/models/cardio_random_forest_model.pkl`
+## Security and Compliance Notes
 
-And scaler:
-- `health-models/models/cardio_scaler.pkl`
+- Passwords are hashed using Werkzeug
+- CAPTCHA protection on auth routes
+- Sessions are configured with HTTPOnly and SameSite flags
+- Medical disclaimer included in generated reports
 
-### Python dependency issues
-Use Python `3.11.10` and recreate environment:
-```bash
-rm -rf .venv
-python3.11 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
+## Future Improvements (Optional)
 
-### Force fresh DB locally
-```bash
-rm -f health_companion.db
-python app.py
-```
-
-## Quick Smoke Test Checklist
-
-- [ ] Landing page loads
-- [ ] Register works with CAPTCHA
-- [ ] Login works with CAPTCHA
-- [ ] Forgot password identity verification works
-- [ ] Password reset updates login credentials
-- [ ] Profile save works
-- [ ] Stroke assessment works
-- [ ] Diabetes assessment works
-- [ ] Cardiovascular assessment works
-- [ ] Reports page renders and PDF download works
+- Add model versioning and per-model report files
+- Add data provenance documentation for the CSV datasets
+- Add unit tests for inference and report generation
 
 ---
 
+If you want any section adjusted for academic submission (B.Tech report format), I can tailor the wording and add a formal abstract, objectives, methodology, and evaluation section.
