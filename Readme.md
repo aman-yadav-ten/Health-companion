@@ -1,48 +1,11 @@
 # Health Companion
 
-Health Companion is a Flask-based AI health risk prediction platform that combines user health profiles, machine-learning risk models, and automated clinical-style reports. The application helps users understand potential risk levels for stroke, diabetes, and cardiovascular disease, and provides calculators (BMI and calories) plus downloadable PDF reports.
+Health Companion is my Flask-based health risk prediction app. It collects a single health profile, runs ML models for stroke, diabetes, and cardiovascular risk, and generates clear reports you can download as PDF. It also includes BMI and calorie calculators so users can get quick basic insights in the same workflow.
 
-## Academic Abstract (B.Tech Format)
+## Author
 
-This project presents **Health Companion**, a web-based health risk prediction system that integrates machine learning with a patient profile-driven workflow. The system predicts risk levels for stroke, diabetes, and cardiovascular disease using supervised classification models trained on structured health datasets. A single user profile provides consistent feature inputs for all models. The application includes report generation that transforms numerical predictions into clinically styled summaries with recommendations and PDF export. The work demonstrates an end-to-end pipeline covering data preparation, comparative model training, model selection, deployment, and user-facing decision support.
-
-## Objectives
-
-- Build a unified health risk assessment platform using a single user profile
-- Train and compare multiple supervised learning models for three health conditions
-- Select the best-performing model for each condition using standard evaluation metrics
-- Deploy a production-ready Flask application with report generation and history
-- Provide a user-friendly UI for assessments, calculators, and downloadable reports
-
-## Methodology
-
-1. **Data Preparation:** Datasets are stored as CSVs in `health-models/data/` with predefined columns; each dataset aligns with corresponding profile fields (age, gender, BP, glucose, BMI, etc.).
-2. **Model Training and Selection:** Train/test split with stratification (`train_test_split`), feature standardization (`StandardScaler`), comparative evaluation across Logistic Regression, Decision Tree, Random Forest, SVM, KNN, and Naive Bayes, and selection of the best-performing model per disease using Accuracy, Precision, Recall, F1-Score, cross-validation, and ROC-AUC.
-3. **System Integration:** Flask app loads the trained model and scaler for each assessment, normalizes profile inputs to match the training schema, and stores predictions alongside patient data and report text.
-4. **Reporting:** A clinical-style report generator produces structured narratives with risk summary, inputs, findings, recommendations, and a medical disclaimer.
-
-## Evaluation Summary
-
-Evaluation is performed in the notebooks under `health-models/notebooks/` and recorded in report JSONs where available.
-
-Available report artifacts:
-
-- `health-models/reports/cardio_training_report.json`
-- `health-models/reports/latest_training_report.json` (currently stroke)
-
-Key evaluation points:
-
-- **Cardiovascular model:** Random Forest selected based on comparative metrics and cross-validation
-- **Stroke model:** Random Forest selected based on comparative metrics and cross-validation
-- **Diabetes model:** Random Forest selected (metrics and CV computed in notebook)
-
-For detailed metric tables (Accuracy, Precision, Recall, F1-Score) and ROC-AUC values, see the notebooks and report JSON files.
-
-## Limitations (Academic Context)
-
-- Dataset provenance and collection pipeline are not documented in this repository
-- Diabetes report JSON currently overwrites `latest_training_report.json` when re-run
-- Clinical validity depends on data quality and model generalization; this tool is informational only
+Aman Yadav  
+Email: aman.yadav.ten@gmail.com
 
 ## Live Application
 
@@ -50,16 +13,16 @@ Production app (Render):
 
 `https://health-companion-1xb2.onrender.com`
 
-## What This Project Delivers
+## What It Does
 
-- Profile-first health assessment flow (single health profile reused across all models)
+- One profile for all assessments
 - Stroke, diabetes, and cardiovascular risk predictions
-- Model-driven, clinical-style report generation with PDF export
+- Clinical-style report generation + PDF export
 - BMI and calorie calculators
-- Auth system with CAPTCHA and hashed passwords
-- SQLite-backed persistence with automated schema migration
+- CAPTCHA-protected auth with hashed passwords
+- SQLite storage with automatic schema migration
 
-## High-Level Architecture
+## How It Works
 
 **Request flow (simplified):**
 
@@ -91,7 +54,7 @@ Production app (Render):
 
 ### 2) Profile-Driven Assessments
 
-All prediction routes use the **same profile**. Users fill it once, and the app automatically fetches values when they run assessments.
+All prediction routes use the **same profile**. Users fill it once, and the app automatically fetches values when they run assessments. I did this to avoid re-entering data and to keep model inputs consistent.
 
 Available assessments:
 
@@ -124,7 +87,7 @@ Reports include:
 
 ## Data and Model Training
 
-### Datasets Used (Local Assets)
+### Datasets
 
 Datasets live in `health-models/data/` and are loaded by the training notebooks:
 
@@ -142,12 +105,18 @@ Each dataset is preformatted so the column names match model input requirements 
 
 ### Training Approach and Model Selection
 
-Each disease model is trained using the **same comparative workflow** in its notebook:
+Each disease model is trained using the same comparative workflow in its notebook:
 
 1. Load dataset from `health-models/data/`
 2. Split into train/test (`train_test_split`) with stratification
 3. Scale features (`StandardScaler`)
-4. Evaluate multiple supervised models:
+4. Evaluate multiple supervised models
+5. Compare metrics (Accuracy, Precision, Recall, F1-Score)
+6. Cross-validation and ROC-AUC
+7. Select the best-performing model
+8. Persist model + scaler with `joblib`
+
+Models compared:
 
 - Logistic Regression
 - Decision Tree
@@ -155,11 +124,6 @@ Each disease model is trained using the **same comparative workflow** in its not
 - SVM
 - KNN
 - Naive Bayes
-
-5. Compare metrics (Accuracy, Precision, Recall, F1-Score)
-6. Cross-validation and ROC-AUC
-7. Select the best-performing model
-8. Persist model + scaler with `joblib`
 
 ### Selected Models (Best Performance)
 
@@ -332,7 +296,3 @@ gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 180
 - Add model versioning and per-model report files
 - Add data provenance documentation for the CSV datasets
 - Add unit tests for inference and report generation
-
----
-
-If you want any section adjusted for academic submission (B.Tech report format), I can tailor the wording and add a formal abstract, objectives, methodology, and evaluation section.
