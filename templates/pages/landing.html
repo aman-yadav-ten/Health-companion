@@ -26,15 +26,9 @@
             </nav>
 
             <div class="lp-nav-actions">
-                {% if session.get('loggedin') %}
-                <a href="{{ url_for('index') }}" class="lp-btn lp-btn-ghost">Dashboard</a>
-                <a href="{{ url_for('login', force=1) }}" class="lp-btn lp-btn-secondary">Switch Account</a>
-                <a href="{{ url_for('logout') }}" class="lp-btn lp-btn-primary">Logout</a>
-                {% else %}
-                <a href="{{ url_for('login') }}" class="lp-btn lp-btn-ghost">Login</a>
+                <a href="{{ url_for('login', force=1) if has_active_session else url_for('login') }}" class="lp-btn lp-btn-ghost">Login</a>
                 <a href="{{ url_for('forgot_password') }}" class="lp-btn lp-btn-secondary">Reset Password</a>
                 <a href="{{ url_for('register') }}" class="lp-btn lp-btn-primary">Start Assessment</a>
-                {% endif %}
             </div>
         </div>
     </header>
@@ -51,13 +45,8 @@
                     </p>
 
                     <div class="lp-hero-actions">
-                        {% if session.get('loggedin') %}
-                        <a href="{{ url_for('index') }}" class="lp-btn lp-btn-primary">Open Dashboard</a>
-                        <a href="{{ url_for('login', force=1) }}" class="lp-btn lp-btn-secondary">Switch Account</a>
-                        {% else %}
                         <a href="{{ url_for('register') }}" class="lp-btn lp-btn-primary">Start Assessment</a>
-                        <a href="{{ url_for('login') }}" class="lp-btn lp-btn-secondary">Login</a>
-                        {% endif %}
+                        <a href="{{ url_for('login', force=1) if has_active_session else url_for('login') }}" class="lp-btn lp-btn-secondary">Login</a>
                     </div>
 
                     <div class="lp-trust-badges" aria-label="Trust Badges">
@@ -65,6 +54,14 @@
                         <span><i class="fa-solid fa-wallet"></i> Free</span>
                         <span><i class="fa-solid fa-shield-halved"></i> Secure</span>
                     </div>
+                    {% if has_active_session %}
+                    <p class="lp-hero-subtitle">
+                        Active session detected.
+                        <a href="{{ url_for('index') }}">Open dashboard</a>
+                        or
+                        <a href="{{ url_for('logout') }}">logout</a>.
+                    </p>
+                    {% endif %}
                 </div>
 
                 <div class="lp-hero-visual lp-reveal" aria-hidden="true">
@@ -388,8 +385,8 @@
                 <div class="lp-demo-content lp-reveal">
                     <h2>Health Report Preview</h2>
                     <p>Professional summary layout with risk level, probability indicators, and recommendations.</p>
-                    <a href="{{ url_for('index') if session.get('loggedin') else url_for('login') }}" class="lp-btn lp-btn-secondary">
-                        {{ 'View Dashboard' if session.get('loggedin') else 'View Dashboard' }}
+                    <a href="{{ url_for('index') if has_active_session else url_for('login') }}" class="lp-btn lp-btn-secondary">
+                        {{ 'View Dashboard' if has_active_session else 'View Dashboard' }}
                     </a>
                 </div>
 

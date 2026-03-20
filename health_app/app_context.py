@@ -75,6 +75,16 @@ def _find_existing_project_file(relative_paths):
     return None, None
 
 
+def _apply_model_pickle_compat(model):
+    """
+    Restore attributes that may be missing when pickled sklearn estimators
+    are loaded across different sklearn versions.
+    """
+    if hasattr(model, '__dict__') and not hasattr(model, 'multi_class'):
+        model.multi_class = 'auto'
+    return model
+
+
 # =====================================================
 # SECTION 3: DATABASE CONNECTION & INITIALIZATION
 # =====================================================
@@ -726,7 +736,7 @@ def strokeml(gender, age, hypertension, heart_disease, ever_married, work_type, 
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", InconsistentVersionWarning)
-            model = joblib.load(model_path)
+            model = _apply_model_pickle_compat(joblib.load(model_path))
             scaler = joblib.load(scaler_path)
         
         # Create a DataFrame with proper column order to match training data
@@ -789,12 +799,8 @@ def diaml(pregnancies,glucose,bloodpressure,skinthickness,insulin,bmi_dia,diabet
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", InconsistentVersionWarning)
-            model = joblib.load(model_path)
+            model = _apply_model_pickle_compat(joblib.load(model_path))
             scaler = joblib.load(scaler_path)
-        
-        # Compatibility fix for pickled LogisticRegression objects across sklearn versions.
-        if hasattr(model, '__dict__') and not hasattr(model, 'multi_class'):
-            model.multi_class = 'auto'
         
         # Create a DataFrame with column names matching the training data (capitalized)
         input_df = pd.DataFrame({
@@ -893,7 +899,7 @@ def cardiovascularml(age1,gender1,height,weight,ap_hi,ap_lo,cholesterol,glu,smok
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", InconsistentVersionWarning)
-            model = joblib.load(model_path)
+            model = _apply_model_pickle_compat(joblib.load(model_path))
             scaler = joblib.load(scaler_path)
 
         # Normalize profile inputs to the training schema.

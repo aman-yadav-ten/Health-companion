@@ -4,7 +4,18 @@ def landing():
     """
     Public landing page shown as the default app route.
     """
-    return render_template('pages/landing.html', msg='')
+    has_active_session = False
+    if session.get('loggedin'):
+        # Normalize any old persistent session into a browser-session cookie.
+        session.permanent = False
+        has_active_session = bool(get_current_user_account())
+        if not has_active_session:
+            session.pop('loggedin', None)
+            session.pop('id', None)
+            session.pop('user_id', None)
+            session.pop('username', None)
+            session.pop('role', None)
+    return render_template('pages/landing.html', msg='', has_active_session=has_active_session)
 
 def index():
     """
