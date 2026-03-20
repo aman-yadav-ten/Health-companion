@@ -206,6 +206,17 @@
 			animation: fadeUp 0.75s ease;
 		}
 
+		.dashboard-alert {
+			margin-top: 18px;
+			padding: 14px 16px;
+			border-radius: 14px;
+			background: rgba(251, 191, 36, 0.12);
+			border: 1px solid rgba(251, 191, 36, 0.3);
+			color: #fde68a;
+			font-size: 13px;
+			line-height: 1.6;
+		}
+
 		.section-title {
 			display: flex;
 			justify-content: space-between;
@@ -409,12 +420,18 @@
 			<div class="hero-right">
 				<h3>Quick Notes</h3>
 				<ul>
-					<li><i class="fa-solid fa-circle-check"></i> Enter correct values for better prediction accuracy</li>
+					<li><i class="fa-solid fa-circle-check"></i> {% if profile_complete %}Enter correct values for better prediction accuracy{% else %}Complete your profile first, then start any disease assessment{% endif %}</li>
 					<li><i class="fa-solid fa-circle-check"></i> All reports are linked to your account</li>
 					<li><i class="fa-solid fa-circle-check"></i> Use calculators for health monitoring</li>
 				</ul>
 			</div>
 		</div>
+
+		{% if msg %}
+		<div class="dashboard-alert">
+			<i class="fa-solid fa-circle-info"></i> {{ msg }}
+		</div>
+		{% endif %}
 
 		<!-- PREDICTION SECTION -->
 		<div class="section">
@@ -441,7 +458,7 @@
 						• {{ prediction_cards.stroke.assessment_date }}
 						{% endif %}
 					</div>
-					<a href="{{ url_for('stroke') }}">{{ prediction_cards.stroke.cta_text }} <i class="fa-solid fa-arrow-right"></i></a>
+					<a href="{{ prediction_cards.stroke.cta_url }}">{{ prediction_cards.stroke.cta_text }} <i class="fa-solid fa-arrow-right"></i></a>
 				</div>
 
 				<div class="card">
@@ -459,7 +476,7 @@
 						• {{ prediction_cards.cardiovascular.assessment_date }}
 						{% endif %}
 					</div>
-					<a href="{{ url_for('cardiovascular') }}">{{ prediction_cards.cardiovascular.cta_text }} <i class="fa-solid fa-arrow-right"></i></a>
+					<a href="{{ prediction_cards.cardiovascular.cta_url }}">{{ prediction_cards.cardiovascular.cta_text }} <i class="fa-solid fa-arrow-right"></i></a>
 				</div>
 
 				<div class="card">
@@ -477,7 +494,7 @@
 						• {{ prediction_cards.diabetes.assessment_date }}
 						{% endif %}
 					</div>
-					<a href="{{ url_for('diabetes') }}">{{ prediction_cards.diabetes.cta_text }} <i class="fa-solid fa-arrow-right"></i></a>
+					<a href="{{ prediction_cards.diabetes.cta_url }}">{{ prediction_cards.diabetes.cta_text }} <i class="fa-solid fa-arrow-right"></i></a>
 				</div>
 			</div>
 		</div>

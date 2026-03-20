@@ -501,6 +501,86 @@ def save_user_profile(user_id, profile_data):
     conn.close()
 
 
+WORK_TYPE_LABELS = {
+    0: 'Private',
+    1: 'Self-employed',
+    2: 'Government Job',
+    3: 'Children',
+    4: 'Never Worked',
+}
+
+RESIDENCE_TYPE_LABELS = {
+    0: 'Rural',
+    1: 'Urban',
+}
+
+SMOKING_STATUS_LABELS = {
+    0: 'Never smoked',
+    1: 'Currently smokes',
+    2: 'Former smoker',
+    3: 'Smokes occasionally',
+}
+
+
+def _coerce_int(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def describe_gender(value):
+    numeric = _coerce_int(value)
+    if numeric == 1:
+        return 'Male'
+    if numeric == 0:
+        return 'Female'
+    return 'N/A'
+
+
+def describe_work_type(value):
+    numeric = _coerce_int(value)
+    return WORK_TYPE_LABELS.get(numeric, 'Unknown')
+
+
+def describe_residence_type(value):
+    if isinstance(value, str) and value.strip():
+        lowered = value.strip().lower()
+        if lowered in ('urban', 'rural'):
+            return lowered.title()
+    numeric = _coerce_int(value)
+    return RESIDENCE_TYPE_LABELS.get(numeric, 'Unknown')
+
+
+def describe_smoking_status(value):
+    numeric = _coerce_int(value)
+    return SMOKING_STATUS_LABELS.get(numeric, 'Unknown')
+
+
+def calculate_bmi_category(bmi):
+    bmi_value = float(bmi)
+    if bmi_value < 18.5:
+        return 'Underweight'
+    if bmi_value < 25:
+        return 'Normal'
+    if bmi_value < 30:
+        return 'Overweight'
+    return 'Obese'
+
+
+def calculate_bp_category(systolic, diastolic):
+    systolic_value = int(float(systolic))
+    diastolic_value = int(float(diastolic))
+
+    if systolic_value < 120 and diastolic_value < 80:
+        return 'Normal'
+    if systolic_value < 130 and diastolic_value < 80:
+        return 'Elevated'
+    if systolic_value < 140 or diastolic_value < 90:
+        return 'Stage 1 Hypertension'
+    return 'Stage 2 Hypertension'
+
+
 def get_current_user_id():
     """Return current authenticated user id with backward compatibility for old sessions."""
     user_id = session.get('user_id') or session.get('id')
@@ -516,10 +596,22 @@ def get_current_user_account():
         return None
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT id, username FROM users WHERE id = ?', (user_id,))
+    cursor.execute('SELECT id, username, full_name FROM users WHERE id = ?', (user_id,))
     account = cursor.fetchone()
     conn.close()
     return account
+
+
+def get_current_user_display_name():
+    account = get_current_user_account()
+    if account:
+        full_name = (account['full_name'] or '').strip()
+        if full_name:
+            return full_name
+        username = (account['username'] or '').strip()
+        if username:
+            return username
+    return session.get('username', 'Patient')
 
 
 def get_current_user_role():
@@ -744,6 +836,10 @@ def _normalize_cardio_lab_category(value, lab_name):
     raise ValueError(f'Unsupported lab name: {lab_name}')
 
 
+def normalize_cardio_lab_category(value, lab_name):
+    return _normalize_cardio_lab_category(value, lab_name)
+
+
 def cardiovascularml(age1,gender1,height,weight,ap_hi,ap_lo,cholesterol,glu,smoke,alco,active):
     import joblib
     import pandas as pd
@@ -827,9 +923,6 @@ def cardiovascularml(age1,gender1,height,weight,ap_hi,ap_lo,cholesterol,glu,smok
         return {'error': str(e)}
 
 
-@user_required
-
-
 def calculate_bmi_value(weight, height):
     if height <= 0:
         raise ValueError('Height must be greater than zero.')
@@ -843,9 +936,6 @@ def calculate_bmi_value(weight, height):
 # =====================================================
 # SECTION 13: CALORIE CALCULATOR – ROUTE & LOGIC
 # =====================================================
-
-@user_required
-
 
 def calculate_bmr(gender, weight, height, age):
     if gender.lower() == 'female':
@@ -877,27 +967,9 @@ def calculate_calories_based_on_activity(bmr, activity_level):
 
 
 
-@user_required
-
-
-@user_required
-
-
-@user_required
-
-
-@user_required
-
-
-@user_required
-
-
 # =====================================================
 # SECTION 14A: PERSONALIZED HEALTH REPORT
 # =====================================================
-
-@user_required
-
 
 def generate_health_suggestions(profile, assessments):
     """Generate personalized health suggestions based on profile and assessments"""

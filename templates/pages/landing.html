@@ -19,15 +19,22 @@
 
             <nav class="lp-nav-links" aria-label="Primary Navigation">
                 <a href="#features" class="lp-nav-link">Features</a>
+                <a href="#inputs" class="lp-nav-link">Required Inputs</a>
                 <a href="#how-it-works" class="lp-nav-link">How It Works</a>
                 <a href="#why-us" class="lp-nav-link">Why Us</a>
                 <a href="#contact" class="lp-nav-link">Contact</a>
             </nav>
 
             <div class="lp-nav-actions">
+                {% if session.get('loggedin') %}
+                <a href="{{ url_for('index') }}" class="lp-btn lp-btn-ghost">Dashboard</a>
+                <a href="{{ url_for('login', force=1) }}" class="lp-btn lp-btn-secondary">Switch Account</a>
+                <a href="{{ url_for('logout') }}" class="lp-btn lp-btn-primary">Logout</a>
+                {% else %}
                 <a href="{{ url_for('login') }}" class="lp-btn lp-btn-ghost">Login</a>
                 <a href="{{ url_for('forgot_password') }}" class="lp-btn lp-btn-secondary">Reset Password</a>
                 <a href="{{ url_for('register') }}" class="lp-btn lp-btn-primary">Start Assessment</a>
+                {% endif %}
             </div>
         </div>
     </header>
@@ -44,8 +51,13 @@
                     </p>
 
                     <div class="lp-hero-actions">
+                        {% if session.get('loggedin') %}
+                        <a href="{{ url_for('index') }}" class="lp-btn lp-btn-primary">Open Dashboard</a>
+                        <a href="{{ url_for('login', force=1) }}" class="lp-btn lp-btn-secondary">Switch Account</a>
+                        {% else %}
                         <a href="{{ url_for('register') }}" class="lp-btn lp-btn-primary">Start Assessment</a>
                         <a href="{{ url_for('login') }}" class="lp-btn lp-btn-secondary">Login</a>
+                        {% endif %}
                     </div>
 
                     <div class="lp-trust-badges" aria-label="Trust Badges">
@@ -114,6 +126,220 @@
             </div>
         </section>
 
+        <section id="inputs" class="lp-section lp-inputs">
+            <div class="lp-container">
+                <div class="lp-section-head lp-reveal">
+                    <h2>Required Inputs And Clinical Tests</h2>
+                    <p>See exactly which profile inputs, clinical values, and medical tests are needed before running each risk assessment.</p>
+                </div>
+
+                <div class="lp-inputs-overview lp-reveal">
+                    <article class="lp-inputs-kpi">
+                        <span class="lp-inputs-kpi-label">Shared Profile Fields</span>
+                        <strong>Age, sex, lifestyle, and medical history</strong>
+                        <p>These are entered once in the health profile and reused across all prediction modules.</p>
+                    </article>
+                    <article class="lp-inputs-kpi">
+                        <span class="lp-inputs-kpi-label">Home Or Clinic Measurements</span>
+                        <strong>Height, weight, BMI, and blood pressure</strong>
+                        <p>Body measurements can come from a scale, stadiometer, or clinic vitals check.</p>
+                    </article>
+                    <article class="lp-inputs-kpi">
+                        <span class="lp-inputs-kpi-label">Lab-Based Clinical Values</span>
+                        <strong>Glucose, cholesterol, insulin</strong>
+                        <p>These usually come from pathology reports such as fasting glucose and lipid profile tests.</p>
+                    </article>
+                    <article class="lp-inputs-kpi">
+                        <span class="lp-inputs-kpi-label">Before You Start</span>
+                        <strong>Mandatory tests depend on the module</strong>
+                        <p>The cards below show which values are mandatory in the current app and which values are optional but useful.</p>
+                    </article>
+                </div>
+
+                <div class="lp-inputs-note lp-reveal">
+                    <div class="lp-inputs-note-icon">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </div>
+                    <div>
+                        <h3>Use recent reports and vitals</h3>
+                        <p>Enter the latest clinic measurements or lab report values in mg/dL where applicable. The module tabs below show the exact test name to look for.</p>
+                    </div>
+                </div>
+
+                <div class="lp-input-tabs lp-reveal" role="tablist" aria-label="Risk input modules">
+                    <button class="lp-input-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="lp-input-panel-cardio" data-input-target="cardio">
+                        <i class="fa-solid fa-heart-pulse"></i> Cardiovascular
+                    </button>
+                    <button class="lp-input-tab" type="button" role="tab" aria-selected="false" aria-controls="lp-input-panel-stroke" data-input-target="stroke">
+                        <i class="fa-solid fa-brain"></i> Stroke
+                    </button>
+                    <button class="lp-input-tab" type="button" role="tab" aria-selected="false" aria-controls="lp-input-panel-diabetes" data-input-target="diabetes">
+                        <i class="fa-solid fa-droplet"></i> Diabetes
+                    </button>
+                </div>
+
+                <div class="lp-input-panels">
+                    <article id="lp-input-panel-cardio" class="lp-input-card lp-input-card-cardio lp-input-panel is-active" role="tabpanel" data-input-panel="cardio">
+                        <div class="lp-input-card-head">
+                            <div class="lp-input-card-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                            <div>
+                                <h3>Cardiovascular Risk</h3>
+                                <p>Focuses on blood pressure, cholesterol, glucose, BMI, and lifestyle risk factors.</p>
+                            </div>
+                        </div>
+
+                        <div class="lp-input-panel-grid">
+                            <div class="lp-input-mini">
+                                <h4>Mandatory App Inputs</h4>
+                                <div class="lp-chip-row">
+                                    <span class="lp-chip">Age</span>
+                                    <span class="lp-chip">Gender</span>
+                                    <span class="lp-chip">Height</span>
+                                    <span class="lp-chip">Weight</span>
+                                    <span class="lp-chip">Systolic BP</span>
+                                    <span class="lp-chip">Diastolic BP</span>
+                                    <span class="lp-chip">Cholesterol</span>
+                                    <span class="lp-chip">Glucose</span>
+                                    <span class="lp-chip">Smoking</span>
+                                    <span class="lp-chip">Alcohol Use</span>
+                                    <span class="lp-chip">Physical Activity</span>
+                                </div>
+                            </div>
+
+                            <div class="lp-input-mini">
+                                <h4>Clinical Values Used</h4>
+                                <ul class="lp-input-list">
+                                    <li>Blood pressure in mmHg</li>
+                                    <li>Cholesterol in mg/dL</li>
+                                    <li>Glucose in mg/dL</li>
+                                    <li>BMI from height and weight</li>
+                                </ul>
+                            </div>
+
+                            <div class="lp-input-mini">
+                                <h4>Exact Test / Source</h4>
+                                <ul class="lp-input-list">
+                                    <li>Blood Pressure Measurement using sphygmomanometer or digital BP monitor</li>
+                                    <li>Lipid Profile / Lipid Panel for cholesterol</li>
+                                    <li>Fasting Plasma Glucose (FPG) or Fasting Blood Sugar (FBS)</li>
+                                    <li>Height and weight measurement during vitals check</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="lp-input-callout">
+                            <span class="lp-input-callout-label">Mandatory Tests / Measurements</span>
+                            <p>Exact tests needed: Blood Pressure Measurement, Lipid Profile / Lipid Panel, Fasting Plasma Glucose or Fasting Blood Sugar, and height and weight measurement.</p>
+                        </div>
+                    </article>
+
+                    <article id="lp-input-panel-stroke" class="lp-input-card lp-input-card-stroke lp-input-panel" role="tabpanel" data-input-panel="stroke" hidden>
+                        <div class="lp-input-card-head">
+                            <div class="lp-input-card-icon"><i class="fa-solid fa-brain"></i></div>
+                            <div>
+                                <h3>Stroke Risk</h3>
+                                <p>Uses glucose, BMI, diagnosis history, and profile-based lifestyle information.</p>
+                            </div>
+                        </div>
+
+                        <div class="lp-input-panel-grid">
+                            <div class="lp-input-mini">
+                                <h4>Mandatory App Inputs</h4>
+                                <div class="lp-chip-row">
+                                    <span class="lp-chip">Gender</span>
+                                    <span class="lp-chip">Age</span>
+                                    <span class="lp-chip">Hypertension History</span>
+                                    <span class="lp-chip">Heart Disease History</span>
+                                    <span class="lp-chip">Ever Married</span>
+                                    <span class="lp-chip">Work Type</span>
+                                    <span class="lp-chip">Residence Type</span>
+                                    <span class="lp-chip">Average Glucose</span>
+                                    <span class="lp-chip">BMI</span>
+                                    <span class="lp-chip">Smoking Status</span>
+                                </div>
+                            </div>
+
+                            <div class="lp-input-mini">
+                                <h4>Clinical Values Used</h4>
+                                <ul class="lp-input-list">
+                                    <li>Glucose in mg/dL</li>
+                                    <li>BMI from height and weight</li>
+                                    <li>Confirmed hypertension history</li>
+                                    <li>Confirmed heart disease history</li>
+                                </ul>
+                            </div>
+
+                            <div class="lp-input-mini">
+                                <h4>Exact Test / Source</h4>
+                                <ul class="lp-input-list">
+                                    <li>Fasting Plasma Glucose (FPG) or Fasting Blood Sugar (FBS)</li>
+                                    <li>Height and weight measurement for BMI</li>
+                                    <li>Previous hypertension diagnosis, BP record, or doctor note</li>
+                                    <li>ECG, ECHO, cardiology diagnosis, or prior heart disease record</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="lp-input-callout">
+                            <span class="lp-input-callout-label">Mandatory Tests / Measurements</span>
+                            <p>Exact values needed: Fasting Plasma Glucose or Fasting Blood Sugar, height, weight, and confirmed history/records for hypertension and heart disease, plus the non-clinical profile fields.</p>
+                        </div>
+                    </article>
+
+                    <article id="lp-input-panel-diabetes" class="lp-input-card lp-input-card-diabetes lp-input-panel" role="tabpanel" data-input-panel="diabetes" hidden>
+                        <div class="lp-input-card-head">
+                            <div class="lp-input-card-icon"><i class="fa-solid fa-droplet"></i></div>
+                            <div>
+                                <h3>Diabetes Risk</h3>
+                                <p>Uses glucose, blood pressure, BMI, and age first, with optional insulin and skinfold inputs.</p>
+                            </div>
+                        </div>
+
+                        <div class="lp-input-panel-grid">
+                            <div class="lp-input-mini">
+                                <h4>Mandatory App Inputs</h4>
+                                <div class="lp-chip-row">
+                                    <span class="lp-chip">Pregnancies</span>
+                                    <span class="lp-chip">Glucose</span>
+                                    <span class="lp-chip">Blood Pressure</span>
+                                    <span class="lp-chip">Skin Thickness</span>
+                                    <span class="lp-chip">Insulin</span>
+                                    <span class="lp-chip">BMI</span>
+                                    <span class="lp-chip">Diabetes Pedigree Function</span>
+                                    <span class="lp-chip">Age</span>
+                                </div>
+                            </div>
+
+                            <div class="lp-input-mini">
+                                <h4>Clinical Values Used</h4>
+                                <ul class="lp-input-list">
+                                    <li>Glucose in mg/dL</li>
+                                    <li>Blood pressure in mmHg</li>
+                                    <li>BMI from height and weight</li>
+                                    <li>Optional insulin, skin thickness, and family-history score</li>
+                                </ul>
+                            </div>
+
+                            <div class="lp-input-mini">
+                                <h4>Exact Test / Source</h4>
+                                <ul class="lp-input-list">
+                                    <li>Fasting Plasma Glucose (FPG) or Fasting Blood Sugar (FBS)</li>
+                                    <li>Blood Pressure Measurement using sphygmomanometer or digital BP monitor</li>
+                                    <li>Height and weight measurement for BMI</li>
+                                    <li>Fasting Serum Insulin, Triceps Skinfold Thickness, and family history intake if available</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="lp-input-callout">
+                            <span class="lp-input-callout-label">Mandatory Tests / Measurements</span>
+                            <p>Exact mandatory inputs for the current app: Fasting Plasma Glucose or Fasting Blood Sugar, Blood Pressure Measurement, height, weight, and age. Optional extras: Fasting Serum Insulin, Triceps Skinfold Thickness, pregnancy history, and family history.</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
         <section id="how-it-works" class="lp-section lp-how">
             <div class="lp-container">
                 <div class="lp-section-head lp-reveal">
@@ -162,7 +388,9 @@
                 <div class="lp-demo-content lp-reveal">
                     <h2>Health Report Preview</h2>
                     <p>Professional summary layout with risk level, probability indicators, and recommendations.</p>
-                    <a href="{{ url_for('login') }}" class="lp-btn lp-btn-secondary">View Dashboard</a>
+                    <a href="{{ url_for('index') if session.get('loggedin') else url_for('login') }}" class="lp-btn lp-btn-secondary">
+                        {{ 'View Dashboard' if session.get('loggedin') else 'View Dashboard' }}
+                    </a>
                 </div>
 
                 <div class="lp-demo-card lp-reveal" aria-hidden="true">
@@ -197,6 +425,7 @@
             <div>
                 <h4>Features</h4>
                 <a href="#features">Prediction Modules</a>
+                <a href="#inputs">Required Inputs</a>
                 <a href="#how-it-works">How It Works</a>
             </div>
             <div>
@@ -224,12 +453,33 @@
 <script>
 (function () {
     const navbar = document.getElementById('lpNavbar');
+    const tabButtons = Array.from(document.querySelectorAll('[data-input-target]'));
+    const tabPanels = Array.from(document.querySelectorAll('[data-input-panel]'));
+
     const onScroll = () => {
         if (!navbar) return;
         navbar.classList.toggle('scrolled', window.scrollY > 12);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
+
+    const activateInputPanel = (target) => {
+        tabButtons.forEach((button) => {
+            const isActive = button.getAttribute('data-input-target') === target;
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+
+        tabPanels.forEach((panel) => {
+            const isActive = panel.getAttribute('data-input-panel') === target;
+            panel.classList.toggle('is-active', isActive);
+            panel.hidden = !isActive;
+        });
+    };
+
+    tabButtons.forEach((button) => {
+        button.addEventListener('click', () => activateInputPanel(button.getAttribute('data-input-target')));
+    });
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {

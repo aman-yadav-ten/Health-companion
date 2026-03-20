@@ -303,6 +303,12 @@
 			border-left-color: #16a34a;
 		}
 
+		.msg.info {
+			background: #dbeafe;
+			color: #1d4ed8;
+			border-left-color: #2563eb;
+		}
+
 		/* ============================= */
 		/* FOOTER LINK */
 		/* ============================= */
@@ -512,7 +518,7 @@
 			<form action="{{ url_for('login') }}" method="post">
 
 				{% if msg %}
-					<div class="msg {% if status == 'success' %}success{% endif %}">{{ msg }}</div>
+					<div class="msg {% if status == 'success' %}success{% elif status == 'info' %}info{% endif %}">{{ msg }}</div>
 				{% endif %}
 
 				<div class="form-group">

@@ -1,5 +1,15 @@
 from .app_context import *
 
+
+def _current_patient_name():
+    return get_current_user_display_name()
+
+
+def _cardio_smoking_flag(smoking_status):
+    numeric = int(smoking_status)
+    return 1 if numeric in (1, 3) else 0
+
+
 def stroke():
     # Authentication check - protect this route
     if 'loggedin' not in session:
@@ -86,20 +96,20 @@ def stroke():
             
             # Prepare patient data for report
             patient_data = {
-                'name': session.get('username', 'Patient'),
+                'name': _current_patient_name(),
                 'age': int(age),
-                'gender': 'Male' if int(gender) == 1 else 'Female',
-                'height': profile.get('height', 'N/A'),
-                'weight': profile.get('weight', 'N/A'),
+                'gender': describe_gender(gender),
+                'height': float(profile.get('height')) if profile.get('height') not in (None, '') else 'N/A',
+                'weight': float(profile.get('weight')) if profile.get('weight') not in (None, '') else 'N/A',
                 'bmi': float(bmi),
-                'bmi_category': 'Normal' if 18.5 <= float(bmi) < 25 else ('Overweight' if float(bmi) < 30 else 'Obese'),
+                'bmi_category': calculate_bmi_category(bmi),
                 'hypertension': int(hypertension),
                 'heart_disease': int(heart_disease),
                 'avg_glucose': float(avg_glucose_level),
                 'smoking_status': int(smoking_status),
                 'ever_married': int(ever_married),
-                'work_type': work_type,
-                'residence_type': int(residence_type)
+                'work_type': describe_work_type(work_type),
+                'residence_type': describe_residence_type(residence_type)
             }
             
             risk_prediction = {
@@ -135,8 +145,6 @@ def stroke():
         except Exception as e:
             msg = f'Error processing prediction: {str(e)}'
             return render_stroke_page(msg)
-    elif request.method == 'POST':
-        msg = 'Error processing request'
     return render_stroke_page(msg)
 
 def diabetes():
@@ -186,8 +194,14 @@ def diabetes():
             diabetes_pedigree_fnc = profile['diabetes_pedigree_function'] or 0.0
             age_dia = profile['age']
             
-            # Validate critical data
-            if not all([glucose, bloodpressure, bmi_dia, age_dia]):
+            # Validate required values without rejecting legitimate zero defaults.
+            required_profile_values = {
+                'glucose': glucose,
+                'bloodpressure': bloodpressure,
+                'bmi_dia': bmi_dia,
+                'age_dia': age_dia,
+            }
+            if any(value is None or value == '' for value in required_profile_values.values()):
                 msg = 'Your profile is incomplete. Please update it.'
                 return render_diabetes_page(msg)
             
@@ -211,14 +225,14 @@ def diabetes():
             
             # Prepare patient data for report
             patient_data = {
-                'name': session.get('username', 'Patient'),
+                'name': _current_patient_name(),
                 'age': int(age_dia),
-                'gender': 'Female',
+                'gender': describe_gender(profile.get('gender')),
                 'pregnancies': int(pregnancies),
-                'weight': profile.get('weight', 'N/A'),
-                'height': profile.get('height', 'N/A'),
+                'weight': float(profile.get('weight')) if profile.get('weight') not in (None, '') else 'N/A',
+                'height': float(profile.get('height')) if profile.get('height') not in (None, '') else 'N/A',
                 'bmi': float(bmi_dia),
-                'bmi_category': 'Normal' if 18.5 <= float(bmi_dia) < 25 else ('Overweight' if float(bmi_dia) < 30 else 'Obese'),
+                'bmi_category': calculate_bmi_category(bmi_dia),
                 'glucose': float(glucose),
                 'blood_pressure': float(bloodpressure),
                 'insulin': float(insulin),
@@ -259,8 +273,6 @@ def diabetes():
         except Exception as e:
             msg = f'Error processing prediction: {str(e)}'
             return render_diabetes_page(msg)
-    elif request.method == 'POST':
-        msg = 'Error processing request'
     return render_diabetes_page(msg)
 
 def cardiovascular():
@@ -340,7 +352,7 @@ def cardiovascular():
             ap_lo = profile['blood_pressure_diastolic']
             cholesterol = profile['cholesterol']
             glu = profile['glucose_level']
-            smoke = profile['smoking_status']
+            smoke = _cardio_smoking_flag(profile['smoking_status'])
             alco = profile['alcohol_consumption']
             active = profile['physical_activity']
             
@@ -380,20 +392,25 @@ def cardiovascular():
             
             # Prepare patient data for report
             bmi = float(weight) / ((float(height) / 100) ** 2)
+            cholesterol_category = normalize_cardio_lab_category(cholesterol, 'cholesterol')
+            glucose_category = normalize_cardio_lab_category(glu, 'glucose')
             patient_data = {
-                'name': session.get('username', 'Patient'),
+                'name': _current_patient_name(),
                 'age': int(age1),
-                'gender': 'Male' if int(gender1) == 1 else 'Female',
+                'gender': describe_gender(gender1),
                 'height': float(height),
                 'weight': float(weight),
                 'bmi': bmi,
-                'bmi_category': 'Underweight' if bmi < 18.5 else ('Normal' if bmi < 25 else ('Overweight' if bmi < 30 else 'Obese')),
+                'bmi_category': calculate_bmi_category(bmi),
                 'systolic_bp': int(ap_hi),
                 'diastolic_bp': int(ap_lo),
-                'bp_category': 'Normal' if int(ap_hi) < 120 and int(ap_lo) < 80 else ('Elevated' if int(ap_hi) < 130 else ('Stage 1 Hypertension' if int(ap_hi) < 140 else 'Stage 2 Hypertension')),
-                'cholesterol': int(cholesterol),
-                'glucose': int(glu),
+                'bp_category': calculate_bp_category(ap_hi, ap_lo),
+                'cholesterol': float(cholesterol),
+                'cholesterol_category': cholesterol_category,
+                'glucose': float(glu),
+                'glucose_category': glucose_category,
                 'smoking': int(smoke),
+                'smoking_status_label': describe_smoking_status(profile['smoking_status']),
                 'alcohol': int(alco),
                 'physical_activity': int(active)
             }
@@ -431,8 +448,6 @@ def cardiovascular():
         except Exception as e:
             msg = f'Error processing prediction: {str(e)}'
             return render_cardiovascular_page(msg)
-    elif request.method == 'POST':
-        msg = 'Error processing request'
     return render_cardiovascular_page(msg)
 
 def calculate_bmi():
@@ -485,9 +500,18 @@ def calculate_calories():
         if not gender or not weight or not height or not age or not activity_level:
             msg = 'Please fill out the form!'
         else:
-            weight = float(weight)
-            height = float(height)
-            age = int(age)
+            try:
+                weight = float(weight)
+                height = float(height)
+                age = int(age)
+            except ValueError:
+                msg = 'Invalid input. Please enter numeric values.'
+                return render_template('assessments/calculators/calories.html', msg=msg)
+
+            if weight <= 0 or height <= 0 or age <= 0:
+                msg = 'Weight, height, and age must be greater than zero.'
+                return render_template('assessments/calculators/calories.html', msg=msg)
+
             bmr = calculate_bmr(gender, weight, height, age)
             calorie_msg = calculate_calories_based_on_activity(bmr, activity_level)
             msg = f'Your BMR is: {bmr} calories. {calorie_msg}'

@@ -12,13 +12,19 @@ def index():
     Displays health overview and prediction shortcuts.
     """
     user_id = get_current_user_id()
-    if not profile_exists(user_id):
-        return redirect(url_for('profile', msg='Please complete your health profile before using predictions.'))
+    if not user_id:
+        return redirect(url_for('logout'))
+
+    profile_complete = profile_exists(user_id)
+    dashboard_message = ''
+    if not profile_complete:
+        dashboard_message = 'Complete your health profile from the Profile section before running new assessments.'
+
     username = session.get('username')
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    def latest_prediction_meta(table_name):
+    def latest_prediction_meta(table_name, endpoint_name):
         cursor.execute(
             f'''
             SELECT risk_level, probability, assessment_date
@@ -30,13 +36,16 @@ def index():
             (username,)
         )
         row = cursor.fetchone()
+
+        cta_url = url_for('profile') if not profile_complete else url_for(endpoint_name)
         if not row:
             return {
                 'exists': False,
-                'risk_level': 'Not analyzed yet',
+                'risk_level': 'Not analyzed yet' if profile_complete else 'Profile incomplete',
                 'probability_text': '',
                 'assessment_date': '',
-                'cta_text': 'Start Assessment'
+                'cta_text': 'Start Assessment' if profile_complete else 'Complete Profile',
+                'cta_url': cta_url,
             }
 
         probability_text = ''
@@ -47,16 +56,22 @@ def index():
             'risk_level': row['risk_level'] or 'Unknown',
             'probability_text': probability_text,
             'assessment_date': (row['assessment_date'] or '')[:10],
-            'cta_text': 'Analyze Again'
+            'cta_text': 'Analyze Again' if profile_complete else 'Update Profile',
+            'cta_url': cta_url,
         }
 
     prediction_cards = {
-        'stroke': latest_prediction_meta('assessment_stroke'),
-        'cardiovascular': latest_prediction_meta('assessment_cardiovascular'),
-        'diabetes': latest_prediction_meta('assessment_diabetes'),
+        'stroke': latest_prediction_meta('assessment_stroke', 'stroke'),
+        'cardiovascular': latest_prediction_meta('assessment_cardiovascular', 'cardiovascular'),
+        'diabetes': latest_prediction_meta('assessment_diabetes', 'diabetes'),
     }
     conn.close()
-    return render_template('pages/index.html', msg='', prediction_cards=prediction_cards)
+    return render_template(
+        'pages/index.html',
+        msg=dashboard_message,
+        profile_complete=profile_complete,
+        prediction_cards=prediction_cards,
+    )
 
 def profile():
     """
@@ -300,31 +315,15 @@ def report():
     profile_data = dict(profile) if profile else {}
     
     # Calculate BMI category
-    if profile_data.get('bmi'):
-        bmi = profile_data['bmi']
-        if bmi < 18.5:
-            bmi_category = 'Underweight'
-        elif bmi < 25:
-            bmi_category = 'Normal Weight'
-        elif bmi < 30:
-            bmi_category = 'Overweight'
-        else:
-            bmi_category = 'Obese'
-        profile_data['bmi_category'] = bmi_category
+    if profile_data.get('bmi') not in (None, ''):
+        profile_data['bmi_category'] = calculate_bmi_category(profile_data['bmi'])
     
     # Calculate BP category
-    if profile_data.get('blood_pressure_systolic') and profile_data.get('blood_pressure_diastolic'):
-        systolic = profile_data['blood_pressure_systolic']
-        diastolic = profile_data['blood_pressure_diastolic']
-        if systolic < 120 and diastolic < 80:
-            bp_category = 'Normal'
-        elif systolic < 130 and diastolic < 80:
-            bp_category = 'Elevated'
-        elif systolic < 140 or diastolic < 90:
-            bp_category = 'Stage 1 Hypertension'
-        else:
-            bp_category = 'Stage 2 Hypertension'
-        profile_data['bp_category'] = bp_category
+    if profile_data.get('blood_pressure_systolic') not in (None, '') and profile_data.get('blood_pressure_diastolic') not in (None, ''):
+        profile_data['bp_category'] = calculate_bp_category(
+            profile_data['blood_pressure_systolic'],
+            profile_data['blood_pressure_diastolic'],
+        )
     
     # Generate preventive health suggestions
     suggestions = generate_health_suggestions(profile_data, assessments)

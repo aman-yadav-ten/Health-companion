@@ -87,11 +87,25 @@ medical decisions made based on this report.
         """
         metrics = {
             "Age": f"{patient_data.get('age', 'N/A')} years",
+            "Gender": patient_data.get('gender', 'N/A'),
+            "Height": self._format_measurement(patient_data.get('height'), 'cm'),
+            "Weight": self._format_measurement(patient_data.get('weight'), 'kg'),
             "BMI": f"{patient_data.get('bmi', 0):.1f} ({patient_data.get('bmi_category', 'N/A')})",
             "Blood Pressure": f"{patient_data.get('systolic_bp', 'N/A')}/{patient_data.get('diastolic_bp', 'N/A')} mmHg",
             "BP Category": patient_data.get('bp_category', 'N/A'),
-            "Cholesterol": self._decode_cholesterol(patient_data.get('cholesterol', 1)),
-            "Glucose": self._decode_glucose(patient_data.get('glucose', 1))
+            "Cholesterol": self._format_cardiovascular_lab_metric(
+                patient_data.get('cholesterol'),
+                patient_data.get('cholesterol_category'),
+                'cholesterol',
+            ),
+            "Glucose": self._format_cardiovascular_lab_metric(
+                patient_data.get('glucose'),
+                patient_data.get('glucose_category'),
+                'glucose',
+            ),
+            "Smoking Status": patient_data.get('smoking_status_label', self._decode_smoking_status(patient_data.get('smoking'))),
+            "Alcohol Use": "Yes" if patient_data.get('alcohol') == 1 else "No",
+            "Physical Activity": "Active" if patient_data.get('physical_activity') == 1 else "Inactive",
         }
         findings = self._build_cardio_findings(patient_data)
         actions = self._build_cardio_actions(patient_data, risk_prediction)
@@ -127,10 +141,15 @@ medical decisions made based on this report.
         """
         metrics = {
             "Age": f"{patient_data.get('age', 'N/A')} years",
+            "Gender": patient_data.get('gender', 'N/A'),
+            "Height": self._format_measurement(patient_data.get('height'), 'cm'),
+            "Weight": self._format_measurement(patient_data.get('weight'), 'kg'),
             "BMI": f"{patient_data.get('bmi', 0):.1f} ({patient_data.get('bmi_category', 'N/A')})",
             "Fasting Glucose": f"{patient_data.get('glucose', 'N/A')} mg/dL",
             "Blood Pressure": f"{patient_data.get('blood_pressure', 'N/A')} mmHg",
+            "Pregnancies": patient_data.get('pregnancies', 'N/A'),
             "Insulin": f"{patient_data.get('insulin', 'N/A')} µU/ml",
+            "Skin Thickness": f"{patient_data.get('skin_thickness', 'N/A')} mm",
             "Family History Score": f"{patient_data.get('diabetes_pedigree_function', 0):.3f}"
         }
         findings = self._build_diabetes_findings(patient_data)
@@ -168,11 +187,17 @@ medical decisions made based on this report.
         """
         metrics = {
             "Age": f"{patient_data.get('age', 'N/A')} years",
+            "Gender": patient_data.get('gender', 'N/A'),
+            "Height": self._format_measurement(patient_data.get('height'), 'cm'),
+            "Weight": self._format_measurement(patient_data.get('weight'), 'kg'),
             "BMI": f"{patient_data.get('bmi', 0):.1f} ({patient_data.get('bmi_category', 'N/A')})",
             "Average Glucose": f"{patient_data.get('avg_glucose', 'N/A')} mg/dL",
             "Hypertension": "Yes" if patient_data.get('hypertension') == 1 else "No",
             "Heart Disease": "Yes" if patient_data.get('heart_disease') == 1 else "No",
-            "Smoking Status": self._decode_smoking_status(patient_data.get('smoking_status', 0))
+            "Smoking Status": self._decode_smoking_status(patient_data.get('smoking_status', 0)),
+            "Marital Status": "Married" if patient_data.get('ever_married') == 1 else "Single/Never Married",
+            "Work Type": patient_data.get('work_type', 'N/A'),
+            "Residence Type": patient_data.get('residence_type', 'N/A'),
         }
         findings = self._build_stroke_findings(patient_data)
         actions = self._build_stroke_actions(patient_data, risk_prediction)
@@ -237,6 +262,62 @@ medical decisions made based on this report.
         if probability >= 0.4:
             return "Moderate - begin focused prevention"
         return "Low - maintain healthy habits"
+
+    @staticmethod
+    def _format_measurement(value, unit):
+        if value in (None, '', 'N/A'):
+            return 'N/A'
+        try:
+            numeric = float(value)
+        except (TypeError, ValueError):
+            return f"{value} {unit}".strip()
+        if numeric.is_integer():
+            numeric = int(numeric)
+        return f"{numeric} {unit}".strip()
+
+    @staticmethod
+    def _normalize_cardio_category(value, lab_name):
+        try:
+            numeric = float(value)
+        except (TypeError, ValueError):
+            return None
+
+        if numeric in (1.0, 2.0, 3.0):
+            return int(numeric)
+
+        if lab_name == 'cholesterol':
+            if numeric < 200:
+                return 1
+            if numeric < 240:
+                return 2
+            return 3
+
+        if lab_name == 'glucose':
+            if numeric < 100:
+                return 1
+            return 2
+
+        return None
+
+    def _format_cardiovascular_lab_metric(self, raw_value, category_value, lab_name):
+        try:
+            raw_numeric = float(raw_value)
+        except (TypeError, ValueError):
+            raw_numeric = None
+
+        display_value = self._format_measurement(raw_value, 'mg/dL')
+        category = self._normalize_cardio_category(category_value, lab_name)
+        if category is None:
+            category = self._normalize_cardio_category(raw_value, lab_name)
+
+        descriptor = self._decode_cholesterol(category) if lab_name == 'cholesterol' else self._decode_glucose(category)
+        descriptor_short = descriptor.split(' (', 1)[0]
+
+        if raw_numeric in (1.0, 2.0, 3.0) and category_value in (None, ''):
+            return descriptor
+        if display_value == 'N/A':
+            return descriptor
+        return f"{display_value} ({descriptor_short})"
 
     def _build_cardio_findings(self, patient_data):
         findings = []
@@ -324,8 +405,10 @@ medical decisions made based on this report.
             findings.append("Age group places you in a higher baseline stroke-risk category.")
         if glucose >= 126:
             findings.append("Glucose profile is elevated and may increase cerebrovascular risk.")
-        if patient_data.get('smoking_status') in (2, 3):
+        if patient_data.get('smoking_status') in (1, 3):
             findings.append("Current smoking behavior increases stroke risk.")
+        elif patient_data.get('smoking_status') == 2:
+            findings.append("Past smoking history remains relevant to vascular risk review.")
         return findings
 
     def _build_stroke_actions(self, patient_data, risk_prediction):
@@ -341,7 +424,7 @@ medical decisions made based on this report.
             "Exercise regularly and avoid prolonged sedentary periods.",
             "Know FAST stroke warning signs (Face, Arm, Speech, Time)."
         ])
-        if patient_data.get('smoking_status') in (2, 3):
+        if patient_data.get('smoking_status') in (1, 3):
             actions.append("Quit smoking to reduce near-term and long-term stroke risk.")
         return actions
     
@@ -1386,8 +1469,8 @@ End of Report
         """Decode smoking status"""
         statuses = {
             0: "Never smoked",
-            1: "Formerly smoked",
-            2: "Currently smokes",
+            1: "Currently smokes",
+            2: "Former smoker",
             3: "Smokes occasionally"
         }
         return statuses.get(status, "Unknown")

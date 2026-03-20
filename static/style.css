@@ -1413,6 +1413,299 @@ body.landing-saas > div:first-child {
     line-height: 1.6;
 }
 
+.lp-inputs-overview {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.lp-inputs-kpi {
+    background: linear-gradient(165deg, rgba(10, 27, 44, 0.88), rgba(16, 45, 70, 0.82));
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 16px 34px rgba(2, 6, 23, 0.24);
+}
+
+.lp-inputs-kpi-label {
+    display: inline-block;
+    margin-bottom: 10px;
+    color: #67e8f9;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.lp-inputs-kpi strong {
+    display: block;
+    color: #f8fafc;
+    font-size: 17px;
+    line-height: 1.4;
+}
+
+.lp-inputs-kpi p {
+    margin: 10px 0 0;
+    color: #cbd5e1;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.lp-inputs-note {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: start;
+    margin-bottom: 20px;
+    padding: 18px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.lp-inputs-note-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: rgba(34, 211, 238, 0.14);
+    border: 1px solid rgba(34, 211, 238, 0.28);
+    color: #67e8f9;
+    font-size: 18px;
+}
+
+.lp-inputs-note h3 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.lp-inputs-note p {
+    margin: 6px 0 0;
+    color: #cbd5e1;
+    font-size: 14px;
+    line-height: 1.75;
+}
+
+.lp-input-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.lp-input-tab {
+    appearance: none;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #cbd5e1;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease, color 0.25s ease;
+}
+
+.lp-input-tab:hover {
+    transform: translateY(-1px);
+    border-color: rgba(34, 211, 238, 0.42);
+    color: #67e8f9;
+}
+
+.lp-input-tab.is-active {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    border-color: transparent;
+    color: #ffffff;
+    box-shadow: 0 14px 30px rgba(6, 182, 212, 0.26);
+}
+
+.lp-input-tab i {
+    margin-right: 8px;
+}
+
+.lp-input-panels {
+    display: block;
+}
+
+.lp-input-panel {
+    display: none;
+}
+
+.lp-input-panel.is-active {
+    display: block;
+}
+
+.lp-input-panel-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.lp-inputs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.lp-input-card {
+    --lp-accent: #22d3ee;
+    --lp-accent-soft: rgba(34, 211, 238, 0.14);
+    --lp-accent-border: rgba(34, 211, 238, 0.28);
+    background: linear-gradient(165deg, rgba(10, 27, 44, 0.92), rgba(12, 36, 58, 0.9));
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-top: 3px solid var(--lp-accent);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 20px 42px rgba(2, 6, 23, 0.28);
+}
+
+.lp-input-card-cardio {
+    --lp-accent: #38bdf8;
+    --lp-accent-soft: rgba(56, 189, 248, 0.14);
+    --lp-accent-border: rgba(56, 189, 248, 0.3);
+}
+
+.lp-input-card-stroke {
+    --lp-accent: #f87171;
+    --lp-accent-soft: rgba(248, 113, 113, 0.14);
+    --lp-accent-border: rgba(248, 113, 113, 0.3);
+}
+
+.lp-input-card-diabetes {
+    --lp-accent: #fbbf24;
+    --lp-accent-soft: rgba(251, 191, 36, 0.14);
+    --lp-accent-border: rgba(251, 191, 36, 0.3);
+}
+
+.lp-input-card-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.lp-input-card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    background: var(--lp-accent-soft);
+    border: 1px solid var(--lp-accent-border);
+    color: var(--lp-accent);
+    font-size: 20px;
+}
+
+.lp-input-card-head h3 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.lp-input-card-head p {
+    margin: 6px 0 0;
+    color: #cbd5e1;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.lp-input-block + .lp-input-block {
+    margin-top: 16px;
+}
+
+.lp-input-block h4 {
+    margin: 0 0 10px;
+    color: #f8fafc;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.lp-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.lp-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: #e2e8f0;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.lp-input-mini {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.lp-input-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 9px;
+}
+
+.lp-input-list li {
+    position: relative;
+    padding-left: 18px;
+    color: #cbd5e1;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.lp-input-list li::before {
+    content: "";
+    position: absolute;
+    top: 9px;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--lp-accent);
+    box-shadow: 0 0 0 5px var(--lp-accent-soft);
+}
+
+.lp-input-callout {
+    margin-top: 18px;
+    padding: 16px;
+    border-radius: 16px;
+    background: var(--lp-accent-soft);
+    border: 1px solid var(--lp-accent-border);
+}
+
+.lp-input-callout-label {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.lp-input-callout p {
+    margin: 0;
+    color: #e2e8f0;
+    font-size: 13px;
+    line-height: 1.75;
+}
+
 .lp-how-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1677,6 +1970,18 @@ body.landing-saas > div:first-child {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    .lp-inputs-overview {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .lp-inputs-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .lp-input-panel-grid {
+        grid-template-columns: 1fr;
+    }
+
     .lp-hero-grid,
     .lp-demo-grid {
         grid-template-columns: 1fr;
@@ -1697,7 +2002,8 @@ body.landing-saas > div:first-child {
     }
 
     .lp-feature-grid,
-    .lp-how-grid {
+    .lp-how-grid,
+    .lp-inputs-overview {
         grid-template-columns: 1fr;
     }
 
@@ -1726,6 +2032,14 @@ body.landing-saas > div:first-child {
     .lp-hero-actions {
         flex-direction: column;
     }
+
+    .lp-inputs-note {
+        grid-template-columns: 1fr;
+    }
+
+    .lp-input-tabs {
+        flex-direction: column;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1748,5 +2062,14 @@ body.landing-saas > div:first-child {
 
     .lp-brand {
         font-size: 18px;
+    }
+
+    .lp-input-card {
+        padding: 16px;
+        border-radius: 18px;
+    }
+
+    .lp-input-card-head {
+        flex-direction: column;
     }
 }

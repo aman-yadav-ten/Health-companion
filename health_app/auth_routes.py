@@ -9,12 +9,31 @@ def _valid_dob(date_of_birth):
     return bool(re.fullmatch(r'^\d{4}-\d{2}-\d{2}$', date_of_birth or ''))
 
 
+def _clear_auth_session():
+    session.pop('loggedin', None)
+    session.pop('id', None)
+    session.pop('user_id', None)
+    session.pop('username', None)
+    session.pop('role', None)
+    session.pop('password_reset_verified_user_id', None)
+    session.pop('password_reset_verified_username', None)
+    session.pop('captcha_code', None)
+
+
 def login():
     msg = request.args.get('msg', '').strip()
     status = request.args.get('status', '').strip()
+    force_reauth = str(request.args.get('force', '0')).lower() in ('1', 'true', 'yes')
 
-    if 'loggedin' in session:
-        return redirect(url_for('profile'))
+    if force_reauth:
+        _clear_auth_session()
+        if not msg:
+            msg = 'Previous session cleared. Sign in with your password to continue.'
+            status = 'info'
+    elif 'loggedin' in session:
+        if get_current_user_account():
+            return redirect(url_for('index'))
+        _clear_auth_session()
 
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
@@ -40,7 +59,7 @@ def login():
                 session['id'] = account['id']
                 session['username'] = account['username']
                 session.permanent = True
-                return redirect(url_for('profile', first_time=1))
+                return redirect(url_for('index'))
 
             msg = 'Invalid username or password.'
             status = 'error'
@@ -249,12 +268,5 @@ def forgot_password():
 
 
 def logout():
-    session.pop('loggedin', None)
-    session.pop('id', None)
-    session.pop('user_id', None)
-    session.pop('username', None)
-    session.pop('role', None)
-    session.pop('password_reset_verified_user_id', None)
-    session.pop('password_reset_verified_username', None)
-    session.pop('captcha_code', None)
+    _clear_auth_session()
     return redirect(url_for('login'))
