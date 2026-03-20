@@ -63,6 +63,18 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 
+def _project_path(relative_path):
+    return os.path.join(_BASE_DIR, *relative_path.split('/'))
+
+
+def _find_existing_project_file(relative_paths):
+    for relative_path in relative_paths:
+        absolute_path = _project_path(relative_path)
+        if os.path.exists(absolute_path):
+            return relative_path, absolute_path
+    return None, None
+
+
 # =====================================================
 # SECTION 3: DATABASE CONNECTION & INITIALIZATION
 # =====================================================
@@ -703,10 +715,19 @@ def strokeml(gender, age, hypertension, heart_disease, ever_married, work_type, 
     import joblib
     import pandas as pd
     try:
+        model_rel_path = "health-models/models/stroke_model.pkl"
+        scaler_rel_path = "health-models/models/stroke_scaler.pkl"
+        model_path = _project_path(model_rel_path)
+        scaler_path = _project_path(scaler_rel_path)
+        if not os.path.exists(model_path):
+            return {'error': f"Missing stroke model file: {model_rel_path}"}
+        if not os.path.exists(scaler_path):
+            return {'error': f"Missing stroke scaler file: {scaler_rel_path}"}
+
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", InconsistentVersionWarning)
-            model = joblib.load("health-models/models/stroke_model.pkl")
-            scaler = joblib.load("health-models/models/stroke_scaler.pkl")
+            model = joblib.load(model_path)
+            scaler = joblib.load(scaler_path)
         
         # Create a DataFrame with proper column order to match training data
         input_df = pd.DataFrame({
@@ -757,10 +778,19 @@ def diaml(pregnancies,glucose,bloodpressure,skinthickness,insulin,bmi_dia,diabet
     import joblib
     import pandas as pd
     try:
+        model_rel_path = "health-models/models/diabetes_model.pkl"
+        scaler_rel_path = "health-models/models/diabetes_scaler.pkl"
+        model_path = _project_path(model_rel_path)
+        scaler_path = _project_path(scaler_rel_path)
+        if not os.path.exists(model_path):
+            return {'error': f"Missing diabetes model file: {model_rel_path}"}
+        if not os.path.exists(scaler_path):
+            return {'error': f"Missing diabetes scaler file: {scaler_rel_path}"}
+
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", InconsistentVersionWarning)
-            model = joblib.load("health-models/models/diabetes_model.pkl")
-            scaler = joblib.load("health-models/models/diabetes_scaler.pkl")
+            model = joblib.load(model_path)
+            scaler = joblib.load(scaler_path)
         
         # Compatibility fix for pickled LogisticRegression objects across sklearn versions.
         if hasattr(model, '__dict__') and not hasattr(model, 'multi_class'):
@@ -844,21 +874,22 @@ def cardiovascularml(age1,gender1,height,weight,ap_hi,ap_lo,cholesterol,glu,smok
     import joblib
     import pandas as pd
     try:
-        model_candidates = [
+        model_candidate_rel_paths = [
             "health-models/models/cardio_model.pkl",
             "health-models/models/cardio_random_forest_model.pkl",
         ]
-        model_path = next((p for p in model_candidates if os.path.exists(p)), None)
+        _, model_path = _find_existing_project_file(model_candidate_rel_paths)
         if not model_path:
             return {
                 'error': (
                     "Missing cardiovascular model file. Expected one of: "
-                    f"{', '.join(model_candidates)}"
+                    f"{', '.join(model_candidate_rel_paths)}"
                 )
             }
-        scaler_path = "health-models/models/cardio_scaler.pkl"
+        scaler_rel_path = "health-models/models/cardio_scaler.pkl"
+        scaler_path = _project_path(scaler_rel_path)
         if not os.path.exists(scaler_path):
-            return {'error': f"Missing cardiovascular scaler file: {scaler_path}"}
+            return {'error': f"Missing cardiovascular scaler file: {scaler_rel_path}"}
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", InconsistentVersionWarning)

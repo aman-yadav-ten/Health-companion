@@ -1,0 +1,30 @@
+{
+  "dataset": "health-models/data/cardio.csv",
+  "model_type": "LogisticRegression",
+  "test_size": 0.2,
+  "random_state": 42,
+  "metrics": {
+    "accuracy": 0.6879,
+    "roc_auc": 0.6967,
+    "f1_score": 0.7886
+  },
+  "artifacts": {
+    "model_path": "health-models/models/cardio_model.pkl",
+    "model_size_mb": 0.0006,
+    "scaler_path": "health-models/models/cardio_scaler.pkl",
+    "scaler_size_mb": 0.0008
+  },
+  "feature_columns": [
+    "AGE",
+    "GENDER",
+    "HEIGHT",
+    "WEIGHT",
+    "AP_HIGH",
+    "AP_LOW",
+    "CHOLESTEROL",
+    "GLUCOSE",
+    "SMOKE",
+    "ALCOHOL",
+    "PHYSICAL_ACTIVITY"
+  ]
+}
